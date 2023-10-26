@@ -1,4 +1,4 @@
-#DevLog - ~2:00h
+#DevLog - ~2:45h
 Game 5, side 2d arena shooter part of OrangePascal game jam
 
 ## Game 4/10 in the 10 games in 10 weeks challenge
@@ -19,9 +19,6 @@ need to use provided sprites
 ////////////////////////////////////
 
 - start implementing static mockup sprites
-- - barrels
-- - enemies
-- - UI
 
 - start implementing basic game loop
 - - player movement
@@ -42,10 +39,18 @@ need to use provided sprites
               DONE:
 ////////////////////////////////////
 
-//26.10.2023 - 2:00h
+//26.10.2023 - 2:45h
 - mockup
 - project skeleton
 - start implementing static mockup sprites
 - - player
+- - player pistol
 - - background
 - - tiles
+- - barrels
+- - enemies
+- - UI player hp
+- - UI player ammo
+- - UI player scoer
+- - Pickup HP
+- - Picktup Power Up

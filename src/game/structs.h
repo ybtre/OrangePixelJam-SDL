@@ -72,7 +72,9 @@ extern Game_Flags game_flags;
 typedef enum Entity_Type
 {
     ENT_PLAYER,
-    ENT_P_GUN,
+    ENT_P_PISTOL,
+    ENT_P_SHOTGUN,
+    ENT_P_MACHINEGUN,
     ENT_P_BULLET,
 
     ENT_UI_P_HEALTH,
@@ -84,6 +86,7 @@ typedef enum Entity_Type
     ENT_BARREL,
 
     ENT_PICKUP_HP,
+    ENT_PICKUP_POWERUP,
 
     ENT_ENEMY,
 
