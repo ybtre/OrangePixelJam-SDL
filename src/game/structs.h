@@ -4,6 +4,7 @@
 #include "../Include/SDL2/SDL.h"
 #include "../Include/SDL2/SDL_ttf.h"
 #include "defs.h"
+#include "util.h"
 
 typedef struct
 {
@@ -35,6 +36,8 @@ typedef struct
     Delegate        delegate;
 
     Mouse           mouse;
+
+    float           dt;
 
     int             keyboard[MAX_KEYBOARD_KEYS];
 
@@ -116,6 +119,7 @@ typedef struct
     Entity_Type     type;
 
     SDL_Rect        rect; //x, y for position, w, h for constructing dest rect
+    Vec2            vel;
 
     SDL_Rect        hitbox;
 

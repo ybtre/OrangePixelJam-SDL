@@ -250,7 +250,128 @@ void init_entities(void)
 
 void update_entities(void)
 {
-    
+    Entity *e;
+    Entity *player = &stage.entities_pool[0];
+    int i = 0;
+    for(i = 0; i < stage.entity_count; i++)
+    {
+        e = &stage.entities_pool[i];
+
+        switch(e->type)
+        {
+            case ENT_PLAYER:
+                {
+                    if(e->active == true)
+                    {
+                        e->vel.x = e->vel.y = 0;
+
+                        if(game.keyboard[SDL_SCANCODE_A])
+                        {
+                            e->vel.x = -PLAYER_VELOCITY;
+                        }
+                        if(game.keyboard[SDL_SCANCODE_D])
+                        {
+                            e->vel.x = PLAYER_VELOCITY;
+                        }
+
+                
+                        e->rect.x += e->vel.x * game.dt;
+                        e->rect.y += e->vel.y * game.dt;
+                    }
+                    break;
+                }
+            case ENT_P_PISTOL:
+                {
+                    if(e->active == true)
+                    {
+                        e->rect.x = player->rect.x + 15;
+                        e->rect.y = player->rect.y + 20;
+                    }
+
+                    break;
+                }
+            case ENT_P_SHOTGUN:
+                {
+                    if(e->active == true)
+                    {
+                        e->rect.x = player->rect.x + 15;
+                        e->rect.y = player->rect.y + 20;
+                    }
+                    break;
+                }
+            case ENT_P_MACHINEGUN:
+                {
+                    if(e->active == true)
+                    {
+                        e->rect.x = player->rect.x + 15;
+                        e->rect.y = player->rect.y + 20;
+                    }
+                    break;
+                }
+            case ENT_P_BULLET:
+                {
+                    break;
+                }
+            case ENT_UI_P_HEALTH:
+                {
+                    break;
+                }
+            case ENT_UI_P_BULLETS:
+                {
+                    break;
+                }
+            case ENT_UI_P_SCORE:
+                {
+                    break;
+                }
+            case ENT_BACKGROUND:
+                {
+                    break;
+                }
+            case ENT_TILE:
+                {
+                    break;
+                }
+            case ENT_BARREL:
+                {
+                    break;
+                }
+            case ENT_PICKUP_HP:
+                {
+                    break;
+                }
+            case ENT_PICKUP_POWERUP:
+                {
+                    break;
+                }
+            case ENT_ENEMY:
+                {
+                    if(e->active == true)
+                    {
+                        e->vel.x = e->vel.y = 0;
+                            
+                        if(e->rect.x < player->rect.x)
+                        {
+                            e->vel.x = ENEMY_VELOCITY;
+                        }
+                        if(e->rect.x > player->rect.x)
+                        {
+                            e->vel.x = -ENEMY_VELOCITY;
+                        }
+
+                        e->rect.x += e->vel.x * game.dt;
+                        e->rect.y += e->vel.y * game.dt;
+                    }
+                    break;
+                }
+            case NUM_ENTITIES:
+                {
+                    break;
+                }
+            default:
+                break;
+        }
+    }    
 }
 
 void draw_entities(void)

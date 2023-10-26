@@ -13,13 +13,15 @@
 #define PI                      3.14159265358979323846
 
 #define PLAYER_SPEED            20
-#define PLAYER_DELTA            .5
+#define PLAYER_VELOCITY         .5
+
+#define ENEMY_VELOCITY          .2
 
 #define GRID_SIZE               16
 #define GRID_X                  20
 #define GRID_Y                  11
 
-#define ENTITIES_MAX            64
+#define ENTITIES_MAX            256
 
 
 #define MAX_NAME_LENGTH         32

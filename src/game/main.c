@@ -41,6 +41,9 @@ int main(int argc, char *argv[])
     char running = 1;
     uint32_t total_frame_ticks = 0;
     uint32_t total_frames = 0;
+
+    float last_tick_time = 0;
+    float delta = 0;
     while(running == 1)
     {
         /*
@@ -49,6 +52,12 @@ int main(int argc, char *argv[])
         uint32_t start_ticks = SDL_GetTicks();
         uint64_t start_perf = SDL_GetPerformanceCounter();
         */
+
+        float tick_time = SDL_GetTicks();
+        delta = tick_time - last_tick_time;
+        last_tick_time = tick_time;
+
+        game.dt = delta;
 
         prepare_scene();
 

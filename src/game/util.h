@@ -15,6 +15,12 @@ typedef struct Vec2i
     int y;
 } Vec2i;
 
+typedef struct Vec2
+{
+    float x;
+    float y;
+} Vec2;
+
 extern void* mmalloc(uint64_t SIZE);
 extern void mfree(void* MEM_TO_FREE);
 
