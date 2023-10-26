@@ -1,5 +1,5 @@
-#DevLog - ~8:30h
-multi grid tic tac toe
+#DevLog - ~1:30h
+Game 5, side 2d arena shooter part of OrangePascal game jam
 
 ## Game 4/10 in the 10 games in 10 weeks challenge
 ////////////////////////////////////
