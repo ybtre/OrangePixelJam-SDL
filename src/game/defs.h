@@ -5,7 +5,7 @@
 //#define DRAW_RECTS
 
 #define SCREEN_WIDTH            320
-#define SCREEN_HEIGHT           160
+#define SCREEN_HEIGHT           180
 #define SCREEN_SCALE            4                   // x4 equals 1280x720
 
 #define FPS                     60
