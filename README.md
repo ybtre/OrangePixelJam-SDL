@@ -18,9 +18,14 @@ need to use provided sprites
               TODO:
 ////////////////////////////////////
 - start implementing basic game loop
-- - player collision w/ 
+- - player flip
+- - playing shooting both ways
+- - enemy choose rand spawn point
 - - enemy deal dmg to player
+- - player collision w/HP pack
 - - player death
+- - enemy drop coin on death
+- - score connect to coin
 
 - implement game reset
 
