@@ -384,8 +384,17 @@ void update_entities(void)
                 {
                     if(e->active == true)
                     {
-                        e->rect.x = player->rect.x + 15;
-                        e->rect.y = player->rect.y + 20;
+                        if(player_facing_right)
+                        {
+                            e->rect.x = player->rect.x + 15;
+                            e->rect.y = player->rect.y + 20;
+                        }
+                        else if(!player_facing_right)
+                        {
+                            e->rect.x = player->rect.x - 15;
+                            e->rect.y = player->rect.y + 20;
+
+                        }
 
                         if(game.keyboard[SDL_SCANCODE_SPACE])
                         {
