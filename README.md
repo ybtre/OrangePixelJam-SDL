@@ -1,4 +1,4 @@
-#DevLog - ~3:45h
+#DevLog - ~6:30h
 Game 5, side 2d arena shooter part of OrangePascal game jam
 
 ## Game 4/10 in the 10 games in 10 weeks challenge
@@ -19,7 +19,6 @@ need to use provided sprites
 ////////////////////////////////////
 - start implementing basic game loop
 - - player collision w/ 
-- - bullet collide w/ enemy
 - - enemy deal dmg to player
 - - player death
 
@@ -31,7 +30,7 @@ need to use provided sprites
               DONE:
 ////////////////////////////////////
 
-//27.10.2023 - ~2:00h
+//27.10.2023 - ~3:15h
 - debugging random movement code issue
 
 - start implementing basic game loop
@@ -42,6 +41,8 @@ need to use provided sprites
 - - player hp
 - - enemy spawning
 - - enemy pool
+- - bullet collide w/ enemy
+- - bullet kill enemy
 
 //26.10.2023 - 3:15h
 - mockup

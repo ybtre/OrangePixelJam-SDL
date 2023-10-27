@@ -66,6 +66,11 @@ int main(int argc, char *argv[])
         game.delegate.logic();
         game.delegate.draw();
 
+        char dt_buffer[32];
+        sprintf(dt_buffer, "Current dt: %f", (float)game.dt / 1000.f);
+        SDL_Rect dest = { 10, 10, 0, 0};
+        render_text(dt_buffer, dest, 1.f);
+
         /*
         //end frame timing
         uint32_t end_ticks = SDL_GetTicks();

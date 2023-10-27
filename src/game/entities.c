@@ -139,6 +139,7 @@ void init_entities(void)
         int i = 0;
         for(i = 0; i < 48; i++)
         {
+            e.id = stage.entity_count;
             e.type =  ENT_ENEMY;
             e.active = false;
             e.hp = 1;
@@ -345,7 +346,7 @@ void update_entities(void)
     
     current_reload += (game.dt / 1000.f);
     enemy_spawn_timer += (game.dt / 1000.f);
-    SDL_Log("Enemy spawn timer: %f", enemy_spawn_timer);
+    //SDL_Log("Enemy spawn timer: %f", enemy_spawn_timer);
 
     // Update entities by type
     int i = 0;
@@ -426,16 +427,37 @@ void update_entities(void)
                         {
                             set_bullet_inactive(e);
                         }
-                        /*
-                        if(e->rect.x >= get_scr_width_scaled() + 100)
+                        if(e->rect.x < - 100)
                         {
-                            e->active = false;
+                            set_bullet_inactive(e);
                         }
-                        if(e->rect.x <= get_scr_width_scaled() - 100)
+                        //5 52 
+                       
+                        for(int eID = 5; eID < 53; eID++)
                         {
-                            e->active = false;
+                            SDL_Rect bul, enem;
+                            bul = e->rect;
+                            bul.w *= SCREEN_SCALE;
+                            bul.h *= SCREEN_SCALE;
+                            bul.x -= (bul.w / 2);
+                            bul.y -= (bul.h / 2);
+
+                            enem = stage.entities_pool[eID].rect;
+                            enem.w *= SCREEN_SCALE;
+                            enem.h *= SCREEN_SCALE;
+                            enem.x -= (enem.w / 2);
+                            enem.y -= (enem.h / 2);
+                            
+                            if(stage.entities_pool[eID].active == true)
+                            {
+                                if(SDL_HasIntersection(&bul, &enem))
+                                {
+                                    //TODO: take into account dmg and hp
+                                    set_bullet_inactive(e);
+                                    set_enemy_inactive(&stage.entities_pool[eID]);
+                                };
+                            }
                         }
-                        */
                     }
                     break;
                 }
@@ -507,7 +529,7 @@ void update_entities(void)
                     if(e->active == false AND enemy_spawn_timer > enemy_spawn_interval)
                     {
                         spawn_enemy(e);
-                        SDL_Log("Spawn enemy");
+                        //SDL_Log("Spawn enemy");
                         enemy_spawn_timer = 0;
                     }
 
@@ -663,7 +685,7 @@ inline Entity* get_enemy_inactive(void)
         }
     }
 
-    SDL_Log("Could not find an inactive bullet");
+    SDL_Log("Could not find an inactive enemy");
     return(e);
 }
 
