@@ -17,6 +17,8 @@
 
 #define ENEMY_VELOCITY          .2
 
+#define BULLET_VELOCITY         2
+
 #define GRID_SIZE               16
 #define GRID_X                  20
 #define GRID_Y                  11

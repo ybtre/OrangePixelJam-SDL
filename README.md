@@ -19,10 +19,7 @@ need to use provided sprites
 ////////////////////////////////////
 - start implementing basic game loop
 - - player collision w/ 
-- - player shooting
-- - player reload
-- - player hp
-- - enemy spawning
+- - bullet collide w/ enemy
 - - enemy deal dmg to player
 - - player death
 
@@ -34,11 +31,17 @@ need to use provided sprites
               DONE:
 ////////////////////////////////////
 
-//27.10.2023 - ~0:30h
+//27.10.2023 - ~2:00h
 - debugging random movement code issue
 
 - start implementing basic game loop
 - - player collision with walls
+- - player shooting
+- - player reload
+- - player bullets pool
+- - player hp
+- - enemy spawning
+- - enemy pool
 
 //26.10.2023 - 3:15h
 - mockup

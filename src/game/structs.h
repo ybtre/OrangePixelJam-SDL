@@ -116,8 +116,11 @@ typedef struct
 
 typedef struct
 {
+    int             id;
     char            active;
     Entity_Type     type;
+    int             hp;
+    int             dmg;
 
     SDL_Rect        rect; //x, y for position, w, h for constructing dest rect
     Vec2            vel;

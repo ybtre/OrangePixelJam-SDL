@@ -5,11 +5,26 @@
 #include "structs.h"
 #include "entities.h"
 #include "util.h"
+#include <stdlib.h>
 
 inline void draw_entity_of_type(Entity_Type TYPE, char DEBUG);
 inline void draw_debug_rect(Entity *e);
 
+inline Entity* get_bullet_inactive(void);
+inline void set_bullet_inactive(Entity *BULLET);
+inline void fire_pistol(Entity E);
+
+inline void spawn_enemy(Entity *E);
+inline void set_enemy_inactive(Entity *ENEMY);
+inline Entity* get_enemy_inactive(void);
+
 Entity player;
+char player_facing_right = true;
+float player_reload = .10;
+float current_reload = 0;
+
+float enemy_spawn_interval = 1;
+float enemy_spawn_timer = 0;
 
 void init_entities(void)
 {
@@ -18,6 +33,7 @@ void init_entities(void)
     { // Player
         player.type = ENT_PLAYER;
         player.active = true;
+        player.hp = 3;
         player.rect.x = get_scr_width_scaled() / 2;
         player.rect.y = get_scr_height_scaled() / 2 + 115;
 
@@ -119,26 +135,32 @@ void init_entities(void)
         stage.entities_pool[stage.entity_count] = e;
         stage.entity_count++;
     }
-    { // Enemy 1
-        e.type =  ENT_ENEMY;
-        e.active = true;
-        e.rect.x = get_scr_width_scaled() / 2 + 350;
-        e.rect.y = get_scr_height_scaled() / 2 + 150;
+    { // Enemies 
+        int i = 0;
+        for(i = 0; i < 48; i++)
+        {
+            e.type =  ENT_ENEMY;
+            e.active = false;
+            e.hp = 1;
+            e.dmg = 1;
+            e.rect.x = get_scr_width_scaled() / 2 + 350;
+            e.rect.y = get_scr_height_scaled() / 2 + 150;
 
-        e.sprite.src.x = 0;
-        e.sprite.src.y = 0;
-        e.sprite.src.w = 10;
-        e.sprite.src.h = 10;
+            e.sprite.src.x = 0;
+            e.sprite.src.y = 0;
+            e.sprite.src.w = 10;
+            e.sprite.src.h = 10;
 
-        e.rect.w = e.sprite.src.w;
-        e.rect.h = e.sprite.src.h;
+            e.rect.w = e.sprite.src.w;
+            e.rect.h = e.sprite.src.h;
 
-        e.sprite.tex = load_texture("assets/enemy_robot.png");
+            e.sprite.tex = load_texture("assets/enemy_robot.png");
 
-        e.hitbox = e.rect;
+            e.hitbox = e.rect;
 
-        stage.entities_pool[stage.entity_count] = e;
-        stage.entity_count++;
+            stage.entities_pool[stage.entity_count] = e;
+            stage.entity_count++;
+        }
     }
     { // Player Pistol
         e.type = ENT_P_PISTOL,
@@ -287,12 +309,45 @@ void init_entities(void)
         stage.entities_pool[stage.entity_count] = e;
         stage.entity_count++;
     }
+    { // Player bullets
+        int i = 0;
+        for(i = 0; i < 32; i++)
+        {
+            e.id = rand();
+            e.type = ENT_P_BULLET,
+            e.active = false;
+            e.dmg = 1;
+            e.rect.x = get_scr_width_scaled() / 2;
+            e.rect.y = get_scr_height_scaled() / 2;
+
+            e.sprite.src.x = 0;
+            e.sprite.src.y = 1;
+            e.sprite.src.w = 9;
+            e.sprite.src.h = 4;
+
+            e.rect.w = e.sprite.src.w;
+            e.rect.h = e.sprite.src.h;
+
+            e.sprite.tex = load_texture("assets/bullets.png");
+
+            e.hitbox = e.rect;
+
+            stage.entities_pool[stage.entity_count] = e;
+            stage.entity_count++;
+        }
+    }
 }
 
 void update_entities(void)
 {
     Entity *e;
     Entity *player = &stage.entities_pool[0];
+    
+    current_reload += (game.dt / 1000.f);
+    enemy_spawn_timer += (game.dt / 1000.f);
+    SDL_Log("Enemy spawn timer: %f", enemy_spawn_timer);
+
+    // Update entities by type
     int i = 0;
     for(i = 0; i < stage.entity_count; i++)
     {
@@ -328,6 +383,16 @@ void update_entities(void)
                     {
                         e->rect.x = player->rect.x + 15;
                         e->rect.y = player->rect.y + 20;
+
+                        if(game.keyboard[SDL_SCANCODE_SPACE])
+                        {
+                            if(current_reload > player_reload)
+                            {
+                                fire_pistol(*e);
+
+                                current_reload = 0;
+                            }
+                        }
                     }
 
                     break;
@@ -352,6 +417,26 @@ void update_entities(void)
                 }
             case ENT_P_BULLET:
                 {
+                    if(e->active == true)
+                    {
+                        e->rect.x += BULLET_VELOCITY * game.dt;
+                        //e->rect.y += e->vel.y * game.dt;
+
+                        if(e->rect.x > get_scr_width_scaled() + 100)
+                        {
+                            set_bullet_inactive(e);
+                        }
+                        /*
+                        if(e->rect.x >= get_scr_width_scaled() + 100)
+                        {
+                            e->active = false;
+                        }
+                        if(e->rect.x <= get_scr_width_scaled() - 100)
+                        {
+                            e->active = false;
+                        }
+                        */
+                    }
                     break;
                 }
             case ENT_UI_P_HEALTH:
@@ -419,6 +504,13 @@ void update_entities(void)
                 }
             case ENT_ENEMY:
                 {
+                    if(e->active == false AND enemy_spawn_timer > enemy_spawn_interval)
+                    {
+                        spawn_enemy(e);
+                        SDL_Log("Spawn enemy");
+                        enemy_spawn_timer = 0;
+                    }
+
                     if(e->active == true)
                     {
                         e->vel.x = e->vel.y = 0;
@@ -463,6 +555,8 @@ void draw_entities(void)
 
     draw_entity_of_type(ENT_PICKUP_HP, true);
     draw_entity_of_type(ENT_PICKUP_POWERUP, true);
+
+    draw_entity_of_type(ENT_P_BULLET, true);
 
     draw_entity_of_type(ENT_UI_P_HEALTH, false);
     draw_entity_of_type(ENT_UI_P_BULLETS, false);
@@ -510,4 +604,70 @@ inline void draw_debug_rect(Entity *e)
     drect.y -= (drect.h / 2);
     SDL_SetRenderDrawColor(game.renderer, 200, 0, 0, 255);
     SDL_RenderDrawRect(game.renderer, &drect);
+}
+
+inline void fire_pistol(Entity E)
+{
+    Entity *b = get_bullet_inactive();
+    
+    b->rect.x = E.rect.x + 25;
+    b->rect.y = E.rect.y;
+
+    b->active = true;
+    b->vel.x = BULLET_VELOCITY;
+}
+
+inline Entity* get_bullet_inactive(void)
+{
+    Entity *b = NULL;
+    int i = 0;
+    for(i = 0; i < stage.entity_count; i++)
+    {
+        b = &stage.entities_pool[i];
+        if(b->type == ENT_P_BULLET AND b->active == false)
+        {
+            return(b);
+        }
+    }
+
+    SDL_Log("Could not find an inactive bullet");
+    return(b);
+}
+
+inline void set_bullet_inactive(Entity *BULLET)
+{
+    BULLET->active = false;
+}
+
+
+inline void spawn_enemy(Entity *E)
+{
+    //Entity *e = get_enemy_inactive();
+    
+    E->rect.x = get_scr_width_scaled() / 2 + 475;
+    E->rect.y = get_scr_height_scaled() / 2 + 150;
+
+    E->active = true;
+}
+
+inline Entity* get_enemy_inactive(void)
+{
+    Entity *e = NULL;
+    int i = 0;
+    for(i = 0; i < stage.entity_count; i++)
+    {
+        e = &stage.entities_pool[i];
+        if(e->type == ENT_ENEMY AND e->active == false)
+        {
+            return(e);
+        }
+    }
+
+    SDL_Log("Could not find an inactive bullet");
+    return(e);
+}
+
+inline void set_enemy_inactive(Entity *ENEMY)
+{
+    ENEMY->active = false;
 }
