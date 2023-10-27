@@ -86,6 +86,7 @@ typedef enum Entity_Type
 
     ENT_BACKGROUND,
     ENT_TILE,
+    ENT_TILE_HITBOX,
     ENT_BARREL,
 
     ENT_PICKUP_HP,
