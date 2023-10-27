@@ -18,7 +18,6 @@ need to use provided sprites
               TODO:
 ////////////////////////////////////
 - start implementing basic game loop
-- - player flip
 - - playing shooting both ways
 - - enemy choose rand spawn point
 - - enemy deal dmg to player
@@ -48,6 +47,8 @@ need to use provided sprites
 - - enemy pool
 - - bullet collide w/ enemy
 - - bullet kill enemy
+- - player flip
+- - gun flip
 
 //26.10.2023 - 3:15h
 - mockup

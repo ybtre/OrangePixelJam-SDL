@@ -92,6 +92,20 @@ void blit_from_sheet(SDL_Texture* TEXTURE, SDL_Rect DEST, SDL_Rect SRC, const fl
 #endif  
 };
 
+void blit_from_sheet_and_flip(SDL_Texture* TEXTURE, SDL_Rect DEST, SDL_Rect SRC, const float ANGLE, const float SCALE, const int CENTER, const SDL_RendererFlip FLIP)
+{
+    DEST.w = SRC.w * SCALE;
+    DEST.h = SRC.h * SCALE;
+
+    if(CENTER)
+    {
+        DEST.x -= DEST.w / 2;
+        DEST.y -= DEST.h / 2;
+    }
+    
+    SDL_RenderCopyEx(game.renderer, TEXTURE, &SRC, &DEST, ANGLE, NULL, FLIP);
+};
+
 void blit_rect(SDL_Texture* TEXTURE, SDL_Rect* SRC, int X, int Y, float SCALE)
 {
     SDL_Rect dest;

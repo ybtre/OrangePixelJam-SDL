@@ -365,10 +365,12 @@ void update_entities(void)
                         if(game.keyboard[SDL_SCANCODE_A])
                         {
                             e->vel.x = -PLAYER_VELOCITY;
+                            player_facing_right = false;
                         }
                         if(game.keyboard[SDL_SCANCODE_D])
                         {
                             e->vel.x = PLAYER_VELOCITY;
+                            player_facing_right = true;
                         }
 
                 
@@ -601,6 +603,20 @@ inline void draw_entity_of_type(Entity_Type TYPE, char DEBUG)
             if(TYPE == ENT_TILE_HITBOX)
             {
                 draw_debug_rect(e);
+            }
+            else if(TYPE == ENT_PLAYER 
+                    OR TYPE == ENT_P_PISTOL 
+                    OR TYPE == ENT_P_SHOTGUN 
+                    OR TYPE == ENT_P_MACHINEGUN)
+            {
+                if(player_facing_right == true)
+                {
+                    blit_from_sheet_and_flip(e->sprite.tex, e->rect, e->sprite.src, 0, SCREEN_SCALE, 1, SDL_FLIP_NONE);
+                }
+                else if (player_facing_right == false)
+                {
+                    blit_from_sheet_and_flip(e->sprite.tex, e->rect, e->sprite.src, 0, SCREEN_SCALE, 1, SDL_FLIP_HORIZONTAL);
+                }
             }
             else
             {
