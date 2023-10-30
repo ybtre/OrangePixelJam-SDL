@@ -15,7 +15,7 @@
 #define PLAYER_SPEED            20
 #define PLAYER_VELOCITY         .5
 
-#define ENEMY_VELOCITY          .2
+#define ENEMY_VELOCITY          .1
 
 #define BULLET_VELOCITY         2
 

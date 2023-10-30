@@ -25,7 +25,7 @@ void init_stage(void)
     cursor_texture = load_texture("assets/cursor.png");
     game.spritesheet = load_texture("assets/spritesheet.png"); 
 
-    game_state = PLAYING;
+    game_state = MAIN_MENU;
 
     //TODO: init level
     init_entities();
@@ -49,7 +49,6 @@ inline void update(void)
             {
                 //TODO: update lvl
                 update_entities();
-        update_entities;
             }
             break;
 
@@ -110,4 +109,5 @@ inline void render(void)
 
 inline void reset_game(void)
 {
+    init_entities();
 }

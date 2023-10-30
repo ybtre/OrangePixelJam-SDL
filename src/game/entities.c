@@ -23,12 +23,27 @@ char player_facing_right = true;
 float player_reload = .10;
 float current_reload = 0;
 
-float enemy_spawn_interval = 1;
-float enemy_spawn_timer = 0;
+char player_take_dmg = false;
+float p_take_dmg_interval = .5f;
+float p_take_dmg_timer = 0;
+
+float enemy_spawn_interval = 3;
+float enemy_spawn_timer = 3;
 
 void init_entities(void)
 {
     Entity e;
+    stage.entity_count = 0;
+    player_facing_right = true;
+    player_reload = .10;
+    current_reload = 0;
+
+    player_take_dmg = false;
+    p_take_dmg_interval = .5f;
+    p_take_dmg_timer = 0;
+
+    enemy_spawn_interval = 3;
+    enemy_spawn_timer = 3;
 
     { // Player
         player.type = ENT_PLAYER;
@@ -272,7 +287,7 @@ void init_entities(void)
         e.type = ENT_PICKUP_HP,
         e.active = true;
         e.rect.x = get_scr_width_scaled() / 2 - 140;
-        e.rect.y = get_scr_height_scaled() / 2 + 140;
+        e.rect.y = get_scr_height_scaled() / 2 + 120;
 
         e.sprite.src.x = 0;
         e.sprite.src.y = 13;
@@ -343,10 +358,14 @@ void update_entities(void)
 {
     Entity *e;
     Entity *player = &stage.entities_pool[0];
-    
+
     current_reload += (game.dt / 1000.f);
     enemy_spawn_timer += (game.dt / 1000.f);
-    //SDL_Log("Enemy spawn timer: %f", enemy_spawn_timer);
+
+    if(player_take_dmg)
+    {
+        p_take_dmg_timer += (game.dt / 1000.f);
+    }
 
     // Update entities by type
     int i = 0;
@@ -431,7 +450,7 @@ void update_entities(void)
                 {
                     if(e->active == true)
                     {
-                        e->rect.x += BULLET_VELOCITY * game.dt;
+                        e->rect.x += e->vel.x * game.dt;
                         //e->rect.y += e->vel.y * game.dt;
 
                         if(e->rect.x > get_scr_width_scaled() + 100)
@@ -529,6 +548,28 @@ void update_entities(void)
                 }
             case ENT_PICKUP_HP:
                 {
+                    if(e->active)
+                    {
+                        SDL_Rect p_r, t_r;
+                        p_r = player->rect;
+                        p_r.w *= SCREEN_SCALE;
+                        p_r.h *= SCREEN_SCALE;
+                        p_r.x -= (p_r.w / 2);
+                        p_r.y -= (p_r.h / 2);
+
+                        t_r = e->rect;
+                        t_r.w *= SCREEN_SCALE;
+                        t_r.h *= SCREEN_SCALE;
+                        t_r.x -= (t_r.w / 2);
+                        t_r.y -= (t_r.h / 2);
+
+                        if(SDL_HasIntersection(&p_r, &t_r))
+                        {
+                            e->active = false;
+                            player->hp++;
+                            SDL_Log("POWERUP: Player HP: %i", player->hp);
+                        };
+                    }
                     break;
                 }
             case ENT_PICKUP_POWERUP:
@@ -560,6 +601,33 @@ void update_entities(void)
                         e->rect.x += e->vel.x * game.dt;
                         e->rect.y += e->vel.y * game.dt;
                     }
+
+                    SDL_Rect p_r, t_r;
+                    p_r = player->rect;
+                    p_r.w *= SCREEN_SCALE;
+                    p_r.h *= SCREEN_SCALE;
+                    p_r.x -= (p_r.w / 2);
+                    p_r.y -= (p_r.h / 2);
+
+                    t_r = e->rect;
+                    t_r.w *= SCREEN_SCALE;
+                    t_r.h *= SCREEN_SCALE;
+                    t_r.x -= (t_r.w / 2);
+                    t_r.y -= (t_r.h / 2);
+
+                    if(SDL_HasIntersection(&p_r, &t_r))
+                    {
+                        player_take_dmg = true;
+
+                        if(player_take_dmg == true AND p_take_dmg_timer > p_take_dmg_interval)
+                        {
+                            player->hp--;
+                            player_take_dmg = false;
+                            p_take_dmg_timer = 0;
+                            SDL_Log("ENEMY DEAL DMG: Player HP: %i", player->hp);
+                        }
+                    };
+                    
                     break;
                 }
             case NUM_ENTITIES:
@@ -570,6 +638,11 @@ void update_entities(void)
                 break;
         }
     }    
+
+    if(player->hp <= 0)
+    {
+        game_state = GAME_OVER;
+    }
 }
 
 void draw_entities(void)
@@ -661,7 +734,15 @@ inline void fire_pistol(Entity E)
     b->rect.y = E.rect.y;
 
     b->active = true;
-    b->vel.x = BULLET_VELOCITY;
+    
+    if(player_facing_right)
+    {
+        b->vel.x = BULLET_VELOCITY;
+    }
+    else 
+    {
+        b->vel.x = -BULLET_VELOCITY;
+    }
 }
 
 inline Entity* get_bullet_inactive(void)
@@ -689,9 +770,16 @@ inline void set_bullet_inactive(Entity *BULLET)
 
 inline void spawn_enemy(Entity *E)
 {
-    //Entity *e = get_enemy_inactive();
-    
-    E->rect.x = get_scr_width_scaled() / 2 + 475;
+    int spawn_point = (rand() % 2);
+
+    if(spawn_point == 0)
+    {
+        E->rect.x = get_scr_width_scaled() / 2 - 525;
+    }
+    else if (spawn_point == 1)
+    {
+        E->rect.x = get_scr_width_scaled() / 2 + 475;
+    }
     E->rect.y = get_scr_height_scaled() / 2 + 150;
 
     E->active = true;

@@ -1,5 +1,5 @@
 #DevLog - ~6:30h
-Game 5, side 2d arena shooter part of OrangePascal game jam
+Game 4, side 2d arena shooter part of OrangePascal game jam
 
 ## Game 4/10 in the 10 games in 10 weeks challenge
 ////////////////////////////////////
@@ -17,22 +17,29 @@ need to use provided sprites
 ////////////////////////////////////
               TODO:
 ////////////////////////////////////
+
+#### WIP:
 - start implementing basic game loop
-- - playing shooting both ways
-- - enemy choose rand spawn point
-- - enemy deal dmg to player
-- - player collision w/HP pack
-- - player death
-- - enemy drop coin on death
+- - enemy drop coin on death(chance)
+- - enemy drop hp pack on death(chance)
+- - enemy drop ammo pack on death(chance)
 - - score connect to coin
 
-- implement game reset
-
+##### TBD
 - polish/game feel
 
 ////////////////////////////////////
               DONE:
 ////////////////////////////////////
+
+//30.10.2023 - ~1:30h
+- implementing basic game loop
+- - player shooting both ways
+- - enemy choose rand spawn point
+- - enemy deal dmg to player
+- - player collision w/HP pack
+- - player death
+- - implement game reset
 
 //27.10.2023 - ~3:15h
 - debugging random movement code issue
