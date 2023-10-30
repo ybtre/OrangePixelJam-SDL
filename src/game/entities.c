@@ -11,23 +11,33 @@ inline void draw_entity_of_type(Entity_Type TYPE, char DEBUG);
 inline void draw_debug_rect(Entity *e);
 
 inline Entity* get_bullet_inactive(void);
-inline void set_bullet_inactive(Entity *BULLET);
+inline void handle_death_bullet(Entity *BULLET);
 inline void fire_pistol(Entity E);
 
 inline void spawn_enemy(Entity *E);
-inline void set_enemy_inactive(Entity *ENEMY);
+inline void handle_death_enemy(Entity *ENEMY);
 inline Entity* get_enemy_inactive(void);
+
+inline void spawn_pickup_coin(Entity E);
+inline Entity* get_pickup_coin_inactive(void);
+inline void handle_death_pickup_coin(Entity *COIN);
+
+inline void spawn_pickup_hp(Entity E);
+inline Entity* get_pickup_hp_inactive(void);
+inline void handle_death_pickup_hp(Entity *HPP);
 
 Entity player;
 char player_facing_right = true;
 float player_reload = .10;
 float current_reload = 0;
 
+int player_score = 0;
+
 char player_take_dmg = false;
 float p_take_dmg_interval = .5f;
 float p_take_dmg_timer = 0;
 
-float enemy_spawn_interval = 3;
+float enemy_spawn_interval = 1;
 float enemy_spawn_timer = 3;
 
 void init_entities(void)
@@ -38,11 +48,13 @@ void init_entities(void)
     player_reload = .10;
     current_reload = 0;
 
+    player_score = 0;
+
     player_take_dmg = false;
     p_take_dmg_interval = .5f;
     p_take_dmg_timer = 0;
 
-    enemy_spawn_interval = 3;
+    enemy_spawn_interval = .5;
     enemy_spawn_timer = 3;
 
     { // Player
@@ -284,25 +296,28 @@ void init_entities(void)
         stage.entity_count++;
     }
     { // Pickup HP
-        e.type = ENT_PICKUP_HP,
-        e.active = true;
-        e.rect.x = get_scr_width_scaled() / 2 - 140;
-        e.rect.y = get_scr_height_scaled() / 2 + 120;
+        for(int i = 0; i < 10; i++)
+        {
+            e.type = ENT_PICKUP_HP,
+            e.active = false;
+            e.rect.x = get_scr_width_scaled() / 2 - 140;
+            e.rect.y = get_scr_height_scaled() / 2 + 120;
 
-        e.sprite.src.x = 0;
-        e.sprite.src.y = 13;
-        e.sprite.src.w = 12;
-        e.sprite.src.h = 13;
+            e.sprite.src.x = 0;
+            e.sprite.src.y = 13;
+            e.sprite.src.w = 12;
+            e.sprite.src.h = 13;
 
-        e.rect.w = e.sprite.src.w;
-        e.rect.h = e.sprite.src.h;
+            e.rect.w = e.sprite.src.w;
+            e.rect.h = e.sprite.src.h;
 
-        e.sprite.tex = load_texture("assets/ui_elements.png");
+            e.sprite.tex = load_texture("assets/ui_elements.png");
 
-        e.hitbox = e.rect;
+            e.hitbox = e.rect;
 
-        stage.entities_pool[stage.entity_count] = e;
-        stage.entity_count++;
+            stage.entities_pool[stage.entity_count] = e;
+            stage.entity_count++;
+        }
     }
     { // Pickup Power Up
         e.type = ENT_PICKUP_POWERUP,
@@ -324,6 +339,30 @@ void init_entities(void)
 
         stage.entities_pool[stage.entity_count] = e;
         stage.entity_count++;
+    }
+    { // Pickup Coin
+        for(int i = 0; i < 36; i++)
+        {
+            e.type = ENT_PICKUP_COIN,
+            e.active = false;
+            e.rect.x = get_scr_width_scaled() / 2 - 140;
+            e.rect.y = get_scr_height_scaled() / 2 + 120;
+
+            e.sprite.src.x = 0;
+            e.sprite.src.y = 0;
+            e.sprite.src.w = 8;
+            e.sprite.src.h = 8;
+
+            e.rect.w = e.sprite.src.w;
+            e.rect.h = e.sprite.src.h;
+
+            e.sprite.tex = load_texture("assets/coin.png");
+
+            e.hitbox = e.rect;
+
+            stage.entities_pool[stage.entity_count] = e;
+            stage.entity_count++;
+        }
     }
     { // Player bullets
         int i = 0;
@@ -352,6 +391,8 @@ void init_entities(void)
             stage.entity_count++;
         }
     }
+
+    SDL_Log("Total Entities initialised: %i", stage.entity_count);
 }
 
 void update_entities(void)
@@ -455,11 +496,11 @@ void update_entities(void)
 
                         if(e->rect.x > get_scr_width_scaled() + 100)
                         {
-                            set_bullet_inactive(e);
+                            handle_death_bullet(e);
                         }
                         if(e->rect.x < - 100)
                         {
-                            set_bullet_inactive(e);
+                            handle_death_bullet(e);
                         }
                         //5 52 
                        
@@ -483,8 +524,8 @@ void update_entities(void)
                                 if(SDL_HasIntersection(&bul, &enem))
                                 {
                                     //TODO: take into account dmg and hp
-                                    set_bullet_inactive(e);
-                                    set_enemy_inactive(&stage.entities_pool[eID]);
+                                    handle_death_bullet(e);
+                                    handle_death_enemy(&stage.entities_pool[eID]);
                                 };
                             }
                         }
@@ -576,6 +617,31 @@ void update_entities(void)
                 {
                     break;
                 }
+            case ENT_PICKUP_COIN:
+                {
+                    if(e->active)
+                    {
+                        SDL_Rect p_r, t_r;
+                        p_r = player->rect;
+                        p_r.w *= SCREEN_SCALE;
+                        p_r.h *= SCREEN_SCALE;
+                        p_r.x -= (p_r.w / 2);
+                        p_r.y -= (p_r.h / 2);
+
+                        t_r = e->rect;
+                        t_r.w *= SCREEN_SCALE;
+                        t_r.h *= SCREEN_SCALE;
+                        t_r.x -= (t_r.w / 2);
+                        t_r.y -= (t_r.h / 2);
+
+                        if(SDL_HasIntersection(&p_r, &t_r))
+                        {
+                            e->active = false;
+                            player_score++;
+                        };
+                    }
+                    break;
+                }
             case ENT_ENEMY:
                 {
                     if(e->active == false AND enemy_spawn_timer > enemy_spawn_interval)
@@ -654,19 +720,25 @@ void draw_entities(void)
 
     draw_entity_of_type(ENT_BARREL, true);
 
-    draw_entity_of_type(ENT_ENEMY, true);
-
     draw_entity_of_type(ENT_PLAYER, true);
     draw_entity_of_type(ENT_P_PISTOL, true);
 
+    draw_entity_of_type(ENT_ENEMY, true);
+
     draw_entity_of_type(ENT_PICKUP_HP, true);
     draw_entity_of_type(ENT_PICKUP_POWERUP, true);
+    draw_entity_of_type(ENT_PICKUP_COIN, true);
 
     draw_entity_of_type(ENT_P_BULLET, true);
 
     draw_entity_of_type(ENT_UI_P_HEALTH, false);
     draw_entity_of_type(ENT_UI_P_BULLETS, false);
     draw_entity_of_type(ENT_UI_P_SCORE, false);
+
+    char score_buffer[32];
+    sprintf(score_buffer, "%i", player_score);
+    SDL_Rect dest = { (get_scr_width_scaled() / 2) - 40, 40, 0, 0};
+    render_text(score_buffer, dest, 2.f);
 }
 
 inline void draw_entity_of_type(Entity_Type TYPE, char DEBUG)
@@ -762,9 +834,73 @@ inline Entity* get_bullet_inactive(void)
     return(b);
 }
 
-inline void set_bullet_inactive(Entity *BULLET)
+inline void handle_death_bullet(Entity *BULLET)
 {
     BULLET->active = false;
+}
+
+inline void spawn_pickup_hp(Entity E)
+{
+    Entity *hp = get_pickup_hp_inactive();
+    
+    hp->rect.x = E.rect.x;
+    hp->rect.y = E.rect.y;
+
+    hp->active = true;
+}
+
+inline Entity* get_pickup_hp_inactive(void)
+{
+    Entity *hp = NULL;
+    int i = 0;
+    for(i = 0; i < stage.entity_count; i++)
+    {
+        hp = &stage.entities_pool[i];
+        if(hp->type == ENT_PICKUP_HP AND hp->active == false)
+        {
+            return(hp);
+        }
+    }
+
+    SDL_Log("Could not find an inactive HP pickup");
+    return(hp);
+}
+
+inline void handle_death_pickup_hp(Entity *HPP)
+{
+    HPP->active = false;
+}
+
+inline void spawn_pickup_coin(Entity E)
+{
+    Entity *coin = get_pickup_coin_inactive();
+    
+    coin->rect.x = E.rect.x;
+    coin->rect.y = E.rect.y;
+
+    coin->active = true;
+}
+
+inline Entity* get_pickup_coin_inactive(void)
+{
+    Entity *coin = NULL;
+    int i = 0;
+    for(i = 0; i < stage.entity_count; i++)
+    {
+        coin = &stage.entities_pool[i];
+        if(coin->type == ENT_PICKUP_COIN AND coin->active == false)
+        {
+            return(coin);
+        }
+    }
+
+    SDL_Log("Could not find an inactive HP pickup");
+    return(coin);
+}
+
+inline void handle_death_pickup_coin(Entity *COIN)
+{
+    COIN->active = false;
 }
 
 
@@ -802,7 +938,47 @@ inline Entity* get_enemy_inactive(void)
     return(e);
 }
 
-inline void set_enemy_inactive(Entity *ENEMY)
+inline void handle_death_enemy(Entity *ENEMY)
 {
     ENEMY->active = false;
+
+    int drop = (rand() % 7);
+    // 0/1 - no drop, 2/3/4 - coin, 5 - hp, 6 - ammo pack
+    switch(drop)
+    {
+        case 0:
+        case 1:
+        {
+            SDL_Log("DROP: None");
+            break;
+        }
+
+        case 2:
+        case 3:
+        case 4:
+        {
+            SDL_Log("DROP: Coin");
+            spawn_pickup_coin(*ENEMY);
+            break;
+        }
+
+        case 5:
+        {
+            SDL_Log("DROP: HP Pack");
+            spawn_pickup_hp(*ENEMY);
+            break;
+        }
+
+        case 6:
+        {
+            SDL_Log("DROP: Ammo Pack");
+            break;
+        }
+        
+        default:
+        {
+            SDL_Log("DROP: Shouldnt happen - %i", drop);
+            break;
+        }
+    }
 }

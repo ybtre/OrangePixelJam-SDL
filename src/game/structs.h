@@ -91,6 +91,7 @@ typedef enum Entity_Type
 
     ENT_PICKUP_HP,
     ENT_PICKUP_POWERUP,
+    ENT_PICKUP_COIN,
 
     ENT_ENEMY,
 
