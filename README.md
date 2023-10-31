@@ -18,19 +18,53 @@ need to use provided sprites
               TODO:
 ////////////////////////////////////
 
-#### WIP:
-- start implementing basic game loop
-- - ammo back implementation
-- - enemy drop ammo pack on death(chance)
+#### WIP: Game Feel
+- basic animations
+- - player anim
+- - enemy anim
+- - coin anim
+- - explosion anim
+- resize entities a little
+- lower enemy hp -> 3hp?
+- higher RoF
+- more enemies
+- bigger bullets
+- muzzle flash
+- faster bullets
+- less accuracy
+- bullet impact effect
+- hit animation (white flash?)
+- enemy knowback on hit
+- permanence (bullet shells on ground?
+- screen shake?
+- player knockback on fire
+- freeze frame/sleep
+- gun delay (moves slightly slower than player)
+- more of everything
+
 
 ##### TBD
 - polish/game feel
+- think of ammo powerup
+- ammo/reload system?
+- connect ammo/reload system to UI?
 
 ////////////////////////////////////
               DONE:
 ////////////////////////////////////
 
-//30.10.2023 - ~2:15h
+// 31.10.2023 - ~2:00h 
+- implementing basic game loop
+- - enemy drop ammo pack on death(chance)
+- - collision detection recognises ammo powerups
+- slight refactor
+- - unity entity hp/dmg to be easier to change/configure
+- - PlayerData struct
+- flipping enemy and bullet sprites based on direction
+- fix flipping issues
+- connect HP UI to player HP
+
+// 30.10.2023 - ~2:15h
 - implementing basic game loop
 - - player shooting both ways
 - - enemy choose rand spawn point

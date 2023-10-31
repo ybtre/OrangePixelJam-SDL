@@ -26,33 +26,31 @@ inline void spawn_pickup_hp(Entity E);
 inline Entity* get_pickup_hp_inactive(void);
 inline void handle_death_pickup_hp(Entity *HPP);
 
-Entity player;
-char player_facing_right = true;
-float player_reload = .10;
-float current_reload = 0;
+inline void handle_death_pickup_powerup(Entity *POWERUP);
+inline Entity* get_pickup_powerup_inactive(void);
+inline void spawn_pickup_powerup(Entity E);
 
-int player_score = 0;
-
-char player_take_dmg = false;
-float p_take_dmg_interval = .5f;
-float p_take_dmg_timer = 0;
+Entity player = {};
+PlayerData player_data = {};
 
 float enemy_spawn_interval = 1;
 float enemy_spawn_timer = 3;
 
 void init_entities(void)
 {
+    player.facing_right = true;
+
+    player_data.reload_rate = .25f;
+    player_data.reload_timer = 0;
+
+    player_data.score = 0;
+
+    player_data.take_dmg = false;
+    player_data.take_dmg_rate = .5f;
+    player_data.take_dmg_timer = 0;
+
     Entity e;
     stage.entity_count = 0;
-    player_facing_right = true;
-    player_reload = .10;
-    current_reload = 0;
-
-    player_score = 0;
-
-    player_take_dmg = false;
-    p_take_dmg_interval = .5f;
-    p_take_dmg_timer = 0;
 
     enemy_spawn_interval = .5;
     enemy_spawn_timer = 3;
@@ -60,7 +58,8 @@ void init_entities(void)
     { // Player
         player.type = ENT_PLAYER;
         player.active = true;
-        player.hp = 3;
+        player.base_hp = 10;
+        player.hp = player.base_hp;
         player.rect.x = get_scr_width_scaled() / 2;
         player.rect.y = get_scr_height_scaled() / 2 + 115;
 
@@ -169,8 +168,11 @@ void init_entities(void)
             e.id = stage.entity_count;
             e.type =  ENT_ENEMY;
             e.active = false;
-            e.hp = 1;
-            e.dmg = 1;
+            e.base_hp = 3;
+            e.hp = e.base_hp;
+            e.base_dmg = 1;
+            e.dmg = e.base_dmg;
+            e.facing_right = true;
             e.rect.x = get_scr_width_scaled() / 2 + 350;
             e.rect.y = get_scr_height_scaled() / 2 + 150;
 
@@ -186,6 +188,7 @@ void init_entities(void)
 
             e.hitbox = e.rect;
 
+            //SDL_Log("Enemy ID: %i", stage.entity_count);
             stage.entities_pool[stage.entity_count] = e;
             stage.entity_count++;
         }
@@ -233,13 +236,33 @@ void init_entities(void)
         stage.entity_count++;
     }
     { // UI Player HP
-        e.type = ENT_UI_P_HEALTH,
+        e.type = ENT_UI_P_HEALTH_BG,
         e.active = true;
         e.rect.x = get_scr_width_scaled() / 2 - 20;
         e.rect.y = get_scr_height_scaled() / 2 + 270;
 
-        e.sprite.src.x = 45;
+        e.sprite.src.x = 78;
         e.sprite.src.y = 13;
+        e.sprite.src.w = 33;
+        e.sprite.src.h = 13;
+
+        e.rect.w = e.sprite.src.w;
+        e.rect.h = e.sprite.src.h;
+
+        e.sprite.tex = load_texture("assets/ui_elements.png");
+
+        e.hitbox = e.rect;
+
+        stage.entities_pool[stage.entity_count] = e;
+        stage.entity_count++;
+
+        e.type = ENT_UI_P_HEALTH_FG,
+        e.active = true;
+        e.rect.x = get_scr_width_scaled() / 2 - 85;
+        e.rect.y = get_scr_height_scaled() / 2 + 245;
+
+        e.sprite.src.x = 78;
+        e.sprite.src.y = 0;
         e.sprite.src.w = 33;
         e.sprite.src.h = 13;
 
@@ -296,7 +319,7 @@ void init_entities(void)
         stage.entity_count++;
     }
     { // Pickup HP
-        for(int i = 0; i < 10; i++)
+        for(int i = 0; i < 32; i++)
         {
             e.type = ENT_PICKUP_HP,
             e.active = false;
@@ -320,25 +343,28 @@ void init_entities(void)
         }
     }
     { // Pickup Power Up
-        e.type = ENT_PICKUP_POWERUP,
-        e.active = true;
-        e.rect.x = get_scr_width_scaled() / 2 - 200;
-        e.rect.y = get_scr_height_scaled() / 2 + 140;
+        for(int i = 0; i < 32; i++)
+        {
+            e.type = ENT_PICKUP_POWERUP,
+            e.active = false;
+            e.rect.x = get_scr_width_scaled() / 2 - 200;
+            e.rect.y = get_scr_height_scaled() / 2 + 140;
 
-        e.sprite.src.x = 2;
-        e.sprite.src.y = 0;
-        e.sprite.src.w = 9;
-        e.sprite.src.h = 13;
+            e.sprite.src.x = 2;
+            e.sprite.src.y = 0;
+            e.sprite.src.w = 9;
+            e.sprite.src.h = 13;
 
-        e.rect.w = e.sprite.src.w;
-        e.rect.h = e.sprite.src.h;
+            e.rect.w = e.sprite.src.w;
+            e.rect.h = e.sprite.src.h;
 
-        e.sprite.tex = load_texture("assets/ui_elements.png");
+            e.sprite.tex = load_texture("assets/ui_elements.png");
 
-        e.hitbox = e.rect;
+            e.hitbox = e.rect;
 
-        stage.entities_pool[stage.entity_count] = e;
-        stage.entity_count++;
+            stage.entities_pool[stage.entity_count] = e;
+            stage.entity_count++;
+        }
     }
     { // Pickup Coin
         for(int i = 0; i < 36; i++)
@@ -364,14 +390,18 @@ void init_entities(void)
             stage.entity_count++;
         }
     }
-    { // Player bullets
+    { // Player Bullets
         int i = 0;
         for(i = 0; i < 32; i++)
         {
             e.id = rand();
             e.type = ENT_P_BULLET,
             e.active = false;
-            e.dmg = 1;
+            e.base_hp = 1;
+            e.hp = e.base_hp;
+            e.base_dmg = 1;
+            e.dmg = e.base_dmg;
+            e.facing_right = true;
             e.rect.x = get_scr_width_scaled() / 2;
             e.rect.y = get_scr_height_scaled() / 2;
 
@@ -400,12 +430,12 @@ void update_entities(void)
     Entity *e;
     Entity *player = &stage.entities_pool[0];
 
-    current_reload += (game.dt / 1000.f);
+    player_data.reload_timer  += (game.dt / 1000.f);
     enemy_spawn_timer += (game.dt / 1000.f);
 
-    if(player_take_dmg)
+    if(player_data.take_dmg)
     {
-        p_take_dmg_timer += (game.dt / 1000.f);
+        player_data.take_dmg_timer += (game.dt / 1000.f);
     }
 
     // Update entities by type
@@ -425,12 +455,12 @@ void update_entities(void)
                         if(game.keyboard[SDL_SCANCODE_A])
                         {
                             e->vel.x = -PLAYER_VELOCITY;
-                            player_facing_right = false;
+                            player->facing_right = false;
                         }
                         if(game.keyboard[SDL_SCANCODE_D])
                         {
                             e->vel.x = PLAYER_VELOCITY;
-                            player_facing_right = true;
+                            player->facing_right = true;
                         }
 
                 
@@ -444,13 +474,15 @@ void update_entities(void)
                 {
                     if(e->active == true)
                     {
-                        if(player_facing_right)
+                        if(player->facing_right)
                         {
+                            e->facing_right = true;
                             e->rect.x = player->rect.x + 15;
                             e->rect.y = player->rect.y + 20;
                         }
-                        else if(!player_facing_right)
+                        else if(!player->facing_right)
                         {
+                            e->facing_right = false;
                             e->rect.x = player->rect.x - 15;
                             e->rect.y = player->rect.y + 20;
 
@@ -458,11 +490,11 @@ void update_entities(void)
 
                         if(game.keyboard[SDL_SCANCODE_SPACE])
                         {
-                            if(current_reload > player_reload)
+                            if(player_data.reload_timer > player_data.reload_rate)
                             {
                                 fire_pistol(*e);
 
-                                current_reload = 0;
+                                player_data.reload_timer = 0;
                             }
                         }
                     }
@@ -491,6 +523,7 @@ void update_entities(void)
                 {
                     if(e->active == true)
                     {
+                        e->facing_right = player->facing_right;
                         e->rect.x += e->vel.x * game.dt;
                         //e->rect.y += e->vel.y * game.dt;
 
@@ -502,8 +535,8 @@ void update_entities(void)
                         {
                             handle_death_bullet(e);
                         }
+
                         //5 52 
-                       
                         for(int eID = 5; eID < 53; eID++)
                         {
                             SDL_Rect bul, enem;
@@ -524,16 +557,31 @@ void update_entities(void)
                                 if(SDL_HasIntersection(&bul, &enem))
                                 {
                                     //TODO: take into account dmg and hp
+                                    stage.entities_pool[eID].hp -= e->dmg;
+
+                                    if(stage.entities_pool[eID].hp <= 0)
+                                    {
+                                        handle_death_enemy(&stage.entities_pool[eID]);
+                                    }
+
                                     handle_death_bullet(e);
-                                    handle_death_enemy(&stage.entities_pool[eID]);
                                 };
                             }
                         }
                     }
                     break;
                 }
-            case ENT_UI_P_HEALTH:
+            case ENT_UI_P_HEALTH_BG:
                 {
+                    break;
+                }
+            case ENT_UI_P_HEALTH_FG:
+                {
+                    if(e->active)
+                    {
+                        e->sprite.src.w = ((float)player->hp/(float)player->base_hp) * 33;
+                        e->rect.w = e->sprite.src.w;
+                    }
                     break;
                 }
             case ENT_UI_P_BULLETS:
@@ -607,7 +655,10 @@ void update_entities(void)
                         if(SDL_HasIntersection(&p_r, &t_r))
                         {
                             e->active = false;
-                            player->hp++;
+                            if(player->hp < player->base_hp)
+                            {
+                                player->hp++;
+                            }
                             SDL_Log("POWERUP: Player HP: %i", player->hp);
                         };
                     }
@@ -615,6 +666,27 @@ void update_entities(void)
                 }
             case ENT_PICKUP_POWERUP:
                 {
+                    if(e->active)
+                    {
+                        SDL_Rect p_r, t_r;
+                        p_r = player->rect;
+                        p_r.w *= SCREEN_SCALE;
+                        p_r.h *= SCREEN_SCALE;
+                        p_r.x -= (p_r.w / 2);
+                        p_r.y -= (p_r.h / 2);
+
+                        t_r = e->rect;
+                        t_r.w *= SCREEN_SCALE;
+                        t_r.h *= SCREEN_SCALE;
+                        t_r.x -= (t_r.w / 2);
+                        t_r.y -= (t_r.h / 2);
+
+                        if(SDL_HasIntersection(&p_r, &t_r))
+                        {
+                            e->active = false;
+                            SDL_Log("TODO: HANDLE POWERUP");
+                        };
+                    }
                     break;
                 }
             case ENT_PICKUP_COIN:
@@ -637,7 +709,7 @@ void update_entities(void)
                         if(SDL_HasIntersection(&p_r, &t_r))
                         {
                             e->active = false;
-                            player_score++;
+                            player_data.score++;
                         };
                     }
                     break;
@@ -658,10 +730,12 @@ void update_entities(void)
                         if(e->rect.x < player->rect.x)
                         {
                             e->vel.x = ENEMY_VELOCITY;
+                            e->facing_right = true;
                         }
                         if(e->rect.x > player->rect.x)
                         {
                             e->vel.x = -ENEMY_VELOCITY;
+                            e->facing_right = false;
                         }
 
                         e->rect.x += e->vel.x * game.dt;
@@ -683,13 +757,14 @@ void update_entities(void)
 
                     if(SDL_HasIntersection(&p_r, &t_r))
                     {
-                        player_take_dmg = true;
+                        player_data.take_dmg = true;
 
-                        if(player_take_dmg == true AND p_take_dmg_timer > p_take_dmg_interval)
+                        if(player_data.take_dmg == true 
+                                AND player_data.take_dmg_timer > player_data.take_dmg_rate)
                         {
                             player->hp--;
-                            player_take_dmg = false;
-                            p_take_dmg_timer = 0;
+                            player_data.take_dmg = false;
+                            player_data.take_dmg_timer = 0;
                             SDL_Log("ENEMY DEAL DMG: Player HP: %i", player->hp);
                         }
                     };
@@ -723,20 +798,21 @@ void draw_entities(void)
     draw_entity_of_type(ENT_PLAYER, true);
     draw_entity_of_type(ENT_P_PISTOL, true);
 
-    draw_entity_of_type(ENT_ENEMY, true);
-
     draw_entity_of_type(ENT_PICKUP_HP, true);
-    draw_entity_of_type(ENT_PICKUP_POWERUP, true);
     draw_entity_of_type(ENT_PICKUP_COIN, true);
+    draw_entity_of_type(ENT_PICKUP_POWERUP, true);
+
+    draw_entity_of_type(ENT_ENEMY, true);
 
     draw_entity_of_type(ENT_P_BULLET, true);
 
-    draw_entity_of_type(ENT_UI_P_HEALTH, false);
+    draw_entity_of_type(ENT_UI_P_HEALTH_BG, false);
+    draw_entity_of_type(ENT_UI_P_HEALTH_FG, false);
     draw_entity_of_type(ENT_UI_P_BULLETS, false);
     draw_entity_of_type(ENT_UI_P_SCORE, false);
 
     char score_buffer[32];
-    sprintf(score_buffer, "%i", player_score);
+    sprintf(score_buffer, "%i", player_data.score);
     SDL_Rect dest = { (get_scr_width_scaled() / 2) - 40, 40, 0, 0};
     render_text(score_buffer, dest, 2.f);
 }
@@ -759,18 +835,24 @@ inline void draw_entity_of_type(Entity_Type TYPE, char DEBUG)
                 draw_debug_rect(e);
             }
             else if(TYPE == ENT_PLAYER 
+                    OR TYPE == ENT_ENEMY
+                    OR TYPE == ENT_P_BULLET
                     OR TYPE == ENT_P_PISTOL 
                     OR TYPE == ENT_P_SHOTGUN 
                     OR TYPE == ENT_P_MACHINEGUN)
             {
-                if(player_facing_right == true)
+                if(e->facing_right == true)
                 {
                     blit_from_sheet_and_flip(e->sprite.tex, e->rect, e->sprite.src, 0, SCREEN_SCALE, 1, SDL_FLIP_NONE);
                 }
-                else if (player_facing_right == false)
+                else if (e->facing_right == false)
                 {
                     blit_from_sheet_and_flip(e->sprite.tex, e->rect, e->sprite.src, 0, SCREEN_SCALE, 1, SDL_FLIP_HORIZONTAL);
                 }
+            }
+            else if(TYPE == ENT_UI_P_HEALTH_FG)
+            {
+                blit_from_sheet(e->sprite.tex, e->rect, e->sprite.src, 0, SCREEN_SCALE, 0);
             }
             else
             {
@@ -801,19 +883,22 @@ inline void draw_debug_rect(Entity *e)
 inline void fire_pistol(Entity E)
 {
     Entity *b = get_bullet_inactive();
+    Entity *p = &stage.entities_pool[0];
     
     b->rect.x = E.rect.x + 25;
     b->rect.y = E.rect.y;
 
     b->active = true;
     
-    if(player_facing_right)
+    if(p->facing_right)
     {
         b->vel.x = BULLET_VELOCITY;
+        b->facing_right = p->facing_right;
     }
     else 
     {
         b->vel.x = -BULLET_VELOCITY;
+        b->facing_right = p->facing_right;
     }
 }
 
@@ -903,6 +988,37 @@ inline void handle_death_pickup_coin(Entity *COIN)
     COIN->active = false;
 }
 
+inline void spawn_pickup_powerup(Entity E)
+{
+    Entity *powerup = get_pickup_powerup_inactive();
+    
+    powerup->rect.x = E.rect.x;
+    powerup->rect.y = E.rect.y;
+
+    powerup->active = true;
+}
+
+inline Entity* get_pickup_powerup_inactive(void)
+{
+    Entity *powerup = NULL;
+    int i = 0;
+    for(i = 0; i < stage.entity_count; i++)
+    {
+        powerup = &stage.entities_pool[i];
+        if(powerup->type == ENT_PICKUP_POWERUP AND powerup->active == false)
+        {
+            return(powerup);
+        }
+    }
+
+    SDL_Log("Could not find an inactive HP pickup");
+    return(powerup);
+}
+
+inline void handle_death_pickup_powerup(Entity *POWERUP)
+{
+    POWERUP->active = false;
+}
 
 inline void spawn_enemy(Entity *E)
 {
@@ -918,6 +1034,7 @@ inline void spawn_enemy(Entity *E)
     }
     E->rect.y = get_scr_height_scaled() / 2 + 150;
 
+    E->hp = E->base_hp;
     E->active = true;
 }
 
@@ -942,42 +1059,56 @@ inline void handle_death_enemy(Entity *ENEMY)
 {
     ENEMY->active = false;
 
-    int drop = (rand() % 7);
-    // 0/1 - no drop, 2/3/4 - coin, 5 - hp, 6 - ammo pack
+    int drop = (rand() % 20);
+    // 0-5 - no drop, 6-17 - coin, 18 - hp, 19 - ammo pack
     switch(drop)
     {
         case 0:
         case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
         {
             SDL_Log("DROP: None");
             break;
         }
 
-        case 2:
-        case 3:
-        case 4:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+        case 15:
+        case 16:
+        case 17:
         {
             SDL_Log("DROP: Coin");
             spawn_pickup_coin(*ENEMY);
             break;
         }
 
-        case 5:
+        case 18:
         {
             SDL_Log("DROP: HP Pack");
             spawn_pickup_hp(*ENEMY);
             break;
         }
 
-        case 6:
+        case 19:
         {
-            SDL_Log("DROP: Ammo Pack");
+            SDL_Log("DROP: Powerup");
+            spawn_pickup_powerup(*ENEMY);
             break;
         }
         
         default:
         {
-            SDL_Log("DROP: Shouldnt happen - %i", drop);
+            SDL_Log("DROP: SHOULD NOT HAPPEN - %i", drop);
             break;
         }
     }

@@ -80,7 +80,8 @@ typedef enum Entity_Type
     ENT_P_MACHINEGUN,
     ENT_P_BULLET,
 
-    ENT_UI_P_HEALTH,
+    ENT_UI_P_HEALTH_BG,
+    ENT_UI_P_HEALTH_FG,
     ENT_UI_P_BULLETS,
     ENT_UI_P_SCORE,
 
@@ -121,7 +122,11 @@ typedef struct
     char            active;
     Entity_Type     type;
     int             hp;
+    int             base_hp;
     int             dmg;
+    int             base_dmg;
+
+    char            facing_right;
 
     SDL_Rect        rect; //x, y for position, w, h for constructing dest rect
     Vec2            vel;
@@ -131,6 +136,18 @@ typedef struct
     Sprite          sprite;
     //Layers          layer;
 } Entity;
+
+typedef struct
+{
+    float           reload_rate;
+    float           reload_timer;
+
+    int             score;
+
+    char            take_dmg;
+    float           take_dmg_rate;
+    float           take_dmg_timer;
+} PlayerData;
 
 typedef struct
 {
