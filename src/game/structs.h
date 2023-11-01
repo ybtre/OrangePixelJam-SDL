@@ -89,6 +89,7 @@ typedef enum Entity_Type
     ENT_TILE,
     ENT_TILE_HITBOX,
     ENT_BARREL,
+    ENT_EXPLOSION,
 
     ENT_PICKUP_HP,
     ENT_PICKUP_POWERUP,
@@ -116,6 +117,15 @@ typedef struct
     SDL_Texture     *tex;
 } Sprite;
 
+typedef struct 
+{
+    char            loop;
+    int             num_frames;
+    int             cur_frame;
+    float           frame_rate;
+    float           frame_timer;
+} AnimData;
+
 typedef struct
 {
     int             id;
@@ -134,11 +144,14 @@ typedef struct
     SDL_Rect        hitbox;
 
     Sprite          sprite;
+    AnimData        anim;
     //Layers          layer;
 } Entity;
 
 typedef struct
 {
+    char            is_moving;
+
     float           reload_rate;
     float           reload_timer;
 

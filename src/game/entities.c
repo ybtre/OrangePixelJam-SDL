@@ -14,6 +14,10 @@ inline Entity* get_bullet_inactive(void);
 inline void handle_death_bullet(Entity *BULLET);
 inline void fire_pistol(Entity E);
 
+inline void handle_death_explosion(Entity *EXPLOSION);
+inline void spawn_explosion(Entity E);
+inline Entity* get_explosion_inactive(void);
+
 inline void spawn_enemy(Entity *E);
 inline void handle_death_enemy(Entity *ENEMY);
 inline Entity* get_enemy_inactive(void);
@@ -30,6 +34,7 @@ inline void handle_death_pickup_powerup(Entity *POWERUP);
 inline Entity* get_pickup_powerup_inactive(void);
 inline void spawn_pickup_powerup(Entity E);
 
+inline void anim_advance(Entity *ENTITY);
 Entity player = {};
 PlayerData player_data = {};
 
@@ -38,6 +43,7 @@ float enemy_spawn_timer = 3;
 
 void init_entities(void)
 {
+    player_data.is_moving = false;
     player.facing_right = true;
 
     player_data.reload_rate = .25f;
@@ -74,6 +80,12 @@ void init_entities(void)
         player.sprite.tex = load_texture("assets/player.png");
 
         player.hitbox = player.rect;
+
+        player.anim.loop = true;
+        player.anim.cur_frame = 0;
+        player.anim.num_frames = 3;
+        player.anim.frame_rate = .1f;
+        player.anim.frame_timer = 0;
 
         stage.entities_pool[0] = player;
         stage.entity_count++;
@@ -187,6 +199,12 @@ void init_entities(void)
             e.sprite.tex = load_texture("assets/enemy_robot.png");
 
             e.hitbox = e.rect;
+
+            e.anim.loop = true;
+            e.anim.cur_frame = 0;
+            e.anim.num_frames = 2;
+            e.anim.frame_rate = .1f;
+            e.anim.frame_timer = 0;
 
             //SDL_Log("Enemy ID: %i", stage.entity_count);
             stage.entities_pool[stage.entity_count] = e;
@@ -315,6 +333,12 @@ void init_entities(void)
 
         e.hitbox = e.rect;
 
+        e.anim.loop = true;
+        e.anim.cur_frame = 0;
+        e.anim.num_frames = 4;
+        e.anim.frame_rate = .2f;
+        e.anim.frame_timer = 0;
+
         stage.entities_pool[stage.entity_count] = e;
         stage.entity_count++;
     }
@@ -386,6 +410,12 @@ void init_entities(void)
 
             e.hitbox = e.rect;
 
+            e.anim.loop = true;
+            e.anim.cur_frame = 0;
+            e.anim.num_frames = 4;
+            e.anim.frame_rate = .15f;
+            e.anim.frame_timer = 0;
+
             stage.entities_pool[stage.entity_count] = e;
             stage.entity_count++;
         }
@@ -416,6 +446,36 @@ void init_entities(void)
             e.sprite.tex = load_texture("assets/bullets.png");
 
             e.hitbox = e.rect;
+
+            stage.entities_pool[stage.entity_count] = e;
+            stage.entity_count++;
+        }
+    }
+    { // Explosions
+        for(int i = 0; i < 36; i++)
+        {
+            e.type = ENT_EXPLOSION,
+            e.active = false;
+            e.rect.x = get_scr_width_scaled() / 2 - 140;
+            e.rect.y = get_scr_height_scaled() / 2 + 120;
+
+            e.sprite.src.x = 0;
+            e.sprite.src.y = 0;
+            e.sprite.src.w = 16;
+            e.sprite.src.h = 16;
+
+            e.rect.w = e.sprite.src.w;
+            e.rect.h = e.sprite.src.h;
+
+            e.sprite.tex = load_texture("assets/explosion.png");
+
+            e.hitbox = e.rect;
+        
+            e.anim.loop = false;
+            e.anim.cur_frame = 0;
+            e.anim.num_frames = 8;
+            e.anim.frame_rate = .05f;
+            e.anim.frame_timer = 0;
 
             stage.entities_pool[stage.entity_count] = e;
             stage.entity_count++;
@@ -456,14 +516,30 @@ void update_entities(void)
                         {
                             e->vel.x = -PLAYER_VELOCITY;
                             player->facing_right = false;
+                            player_data.is_moving = true;
                         }
-                        if(game.keyboard[SDL_SCANCODE_D])
+                        else if(game.keyboard[SDL_SCANCODE_D])
                         {
                             e->vel.x = PLAYER_VELOCITY;
                             player->facing_right = true;
+                            player_data.is_moving = true;
+                        }
+                        else
+                        {
+                            player_data.is_moving = false;    
                         }
 
-                
+                        if(player_data.is_moving)
+                        {
+                            anim_advance(e);
+                        }
+                        else
+                        {
+                            //NOTE: frame 1 is idle
+                            e->anim.cur_frame = 1;
+                            e->anim.frame_timer = 0;
+                        }
+
                         e->rect.x += e->vel.x * game.dt;
                         e->rect.y += e->vel.y * game.dt;
                         //SDL_Log("Player x: %i, Player y: %i", e->rect.x, e->rect.y);
@@ -590,6 +666,10 @@ void update_entities(void)
                 }
             case ENT_UI_P_SCORE:
                 {
+                    if(e->active)
+                    {
+                        anim_advance(e);
+                    }
                     break;
                 }
             case ENT_BACKGROUND:
@@ -633,6 +713,14 @@ void update_entities(void)
                 }
             case ENT_BARREL:
                 {
+                    break;
+                }
+            case ENT_EXPLOSION:
+                {
+                    if(e->active)
+                    {
+                        anim_advance(e);
+                    }
                     break;
                 }
             case ENT_PICKUP_HP:
@@ -693,6 +781,8 @@ void update_entities(void)
                 {
                     if(e->active)
                     {
+                        anim_advance(e);
+
                         SDL_Rect p_r, t_r;
                         p_r = player->rect;
                         p_r.w *= SCREEN_SCALE;
@@ -725,6 +815,7 @@ void update_entities(void)
 
                     if(e->active == true)
                     {
+                        anim_advance(e);
                         e->vel.x = e->vel.y = 0;
                             
                         if(e->rect.x < player->rect.x)
@@ -805,6 +896,7 @@ void draw_entities(void)
     draw_entity_of_type(ENT_ENEMY, true);
 
     draw_entity_of_type(ENT_P_BULLET, true);
+    draw_entity_of_type(ENT_EXPLOSION, false);
 
     draw_entity_of_type(ENT_UI_P_HEALTH_BG, false);
     draw_entity_of_type(ENT_UI_P_HEALTH_FG, false);
@@ -830,6 +922,15 @@ inline void draw_entity_of_type(Entity_Type TYPE, char DEBUG)
 
         if(e->type == TYPE)
         {
+            if(TYPE == ENT_PLAYER
+                OR TYPE == ENT_ENEMY
+                OR TYPE == ENT_UI_P_SCORE
+                OR TYPE == ENT_PICKUP_COIN
+                OR TYPE == ENT_EXPLOSION)
+            {
+                e->sprite.src.x = (e->anim.cur_frame * e->sprite.src.w);
+            }
+
             if(TYPE == ENT_TILE_HITBOX)
             {
                 draw_debug_rect(e);
@@ -880,6 +981,39 @@ inline void draw_debug_rect(Entity *e)
     SDL_RenderDrawRect(game.renderer, &drect);
 }
 
+inline void spawn_explosion(Entity E)
+{
+    Entity *explo = get_explosion_inactive();
+
+    explo->rect.x = E.rect.x;
+    explo->rect.y = E.rect.y;
+
+    explo->active = true;
+    explo->anim.cur_frame = 0;
+}
+
+inline Entity* get_explosion_inactive(void)
+{
+    Entity *expl = NULL;
+    int i = 0;
+    for(i = 0; i < stage.entity_count; i++)
+    {
+        expl = &stage.entities_pool[i];
+        if(expl->type == ENT_EXPLOSION AND expl->active == false)
+        {
+            return(expl);
+        }
+    }
+
+    SDL_Log("Could not find an inactive explosion");
+    return(expl);
+}
+
+inline void handle_death_explosion(Entity *EXPLOSION)
+{
+    EXPLOSION->active = false;
+}
+
 inline void fire_pistol(Entity E)
 {
     Entity *b = get_bullet_inactive();
@@ -922,6 +1056,7 @@ inline Entity* get_bullet_inactive(void)
 inline void handle_death_bullet(Entity *BULLET)
 {
     BULLET->active = false;
+    spawn_explosion(*BULLET);
 }
 
 inline void spawn_pickup_hp(Entity E)
@@ -1111,5 +1246,34 @@ inline void handle_death_enemy(Entity *ENEMY)
             SDL_Log("DROP: SHOULD NOT HAPPEN - %i", drop);
             break;
         }
+    }
+}
+
+inline void anim_advance(Entity *ENTITY)
+{
+    ENTITY->anim.frame_timer += (game.dt / 1000.f);
+
+    if(ENTITY->anim.frame_timer > ENTITY->anim.frame_rate)
+    {
+        ENTITY->anim.cur_frame++;
+
+
+        if(ENTITY->anim.cur_frame >= ENTITY->anim.num_frames)
+        {
+            if(ENTITY->anim.loop == false)
+            {
+                if(ENTITY->type == ENT_EXPLOSION)
+                {
+                    handle_death_explosion(ENTITY);
+                }
+            }
+            else 
+            {
+                ENTITY->anim.cur_frame = 0;
+            }
+        }
+
+        //skip_loop:
+        ENTITY->anim.frame_timer = 0;
     }
 }

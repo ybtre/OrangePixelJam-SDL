@@ -19,20 +19,16 @@ need to use provided sprites
 ////////////////////////////////////
 
 #### WIP: Game Feel
+- explosion on enemy hit
 - basic animations
-- - player anim
-- - enemy anim
-- - coin anim
 - - explosion anim
-- resize entities a little
-- lower enemy hp -> 3hp?
-- higher RoF
-- more enemies
-- bigger bullets
 - muzzle flash
+- resize entities a little (make bigger)
+- bigger bullets
+- bullet impact effect on walls
 - faster bullets
+- higher RoF
 - less accuracy
-- bullet impact effect
 - hit animation (white flash?)
 - enemy knowback on hit
 - permanence (bullet shells on ground?
@@ -40,6 +36,8 @@ need to use provided sprites
 - player knockback on fire
 - freeze frame/sleep
 - gun delay (moves slightly slower than player)
+- telepathic gun
+- more enemies
 - more of everything
 
 
@@ -52,6 +50,16 @@ need to use provided sprites
 ////////////////////////////////////
               DONE:
 ////////////////////////////////////
+
+//01.11.2023 - ~
+- create muzzle flash sprite and anim - ~0:10h
+- basic animations
+- - enemy anim - ~0:30h
+- - coin anim   - 0:05h
+- - UI coin anim - 0:05h
+- - player anim - 0:15h
+- lower enemy hp -> 3hp
+- explosions and expl anim - ~0:45h
 
 // 31.10.2023 - ~2:00h 
 - implementing basic game loop

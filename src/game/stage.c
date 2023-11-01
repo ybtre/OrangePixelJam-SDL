@@ -23,7 +23,6 @@ void init_stage(void)
     memset(&stage, 0, sizeof(Stage));
 
     cursor_texture = load_texture("assets/cursor.png");
-    game.spritesheet = load_texture("assets/spritesheet.png"); 
 
     game_state = MAIN_MENU;
 
