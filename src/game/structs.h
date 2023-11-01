@@ -90,6 +90,7 @@ typedef enum Entity_Type
     ENT_TILE_HITBOX,
     ENT_BARREL,
     ENT_EXPLOSION,
+    ENT_MUZZLE_FLASH,
 
     ENT_PICKUP_HP,
     ENT_PICKUP_POWERUP,
@@ -170,23 +171,5 @@ typedef struct
 }Stage;
 extern Stage stage;
 
-
-/*
-typedef struct
-{
-    int red;
-    int green;
-    int blue;
-    int alpha;
-} COLOR_RGBA;
-
-const COLOR_RGBA C_BACKGROUND       = { 16, 33, 43, 255 };
-
-const COLOR_RGBA C_ORANGE         = { 170, 100, 77, 255 };
-const COLOR_RGBA C_DARK_PURPLE    = { 55, 42, 56, 255 };
-const COLOR_RGBA C_GREEN          = { 120, 131, 116, 255 };
-const COLOR_RGBA C_BEIGE          = { 245, 233, 191, 255 };
-const COLOR_RGBA C_BLUE           = { 91, 118, 141, 255 };
-*/
 
 #endif

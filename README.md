@@ -1,4 +1,4 @@
-#DevLog - ~8:45h
+#DevLog - ~11:00h
 Game 4, side 2d arena shooter part of OrangePascal game jam
 
 ## Game 4/10 in the 10 games in 10 weeks challenge
@@ -19,13 +19,8 @@ need to use provided sprites
 ////////////////////////////////////
 
 #### WIP: Game Feel
-- explosion on enemy hit
-- basic animations
-- - explosion anim
-- muzzle flash
 - resize entities a little (make bigger)
 - bigger bullets
-- bullet impact effect on walls
 - faster bullets
 - higher RoF
 - less accuracy
@@ -51,15 +46,18 @@ need to use provided sprites
               DONE:
 ////////////////////////////////////
 
-//01.11.2023 - ~
-- create muzzle flash sprite and anim - ~0:10h
+//01.11.2023 - ~2:15h
+- create muzzle flash sprite and anim
 - basic animations
-- - enemy anim - ~0:30h
-- - coin anim   - 0:05h
-- - UI coin anim - 0:05h
-- - player anim - 0:15h
-- lower enemy hp -> 3hp
-- explosions and expl anim - ~0:45h
+- - enemy anim
+- - coin anim
+- - UI coin anim
+- - player anim
+- lower enemy hp -> 3hp 
+- explosion on enemy hit
+- explosion anim
+- bullet impact effect on walls
+- muzzle flash
 
 // 31.10.2023 - ~2:00h 
 - implementing basic game loop

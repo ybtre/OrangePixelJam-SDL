@@ -14,6 +14,10 @@ inline Entity* get_bullet_inactive(void);
 inline void handle_death_bullet(Entity *BULLET);
 inline void fire_pistol(Entity E);
 
+inline void handle_death_muzzle_flash(Entity *MUZZLE_FLASH);
+inline void spawn_muzzle_flash(Entity E);
+inline Entity* get_muzzle_flash_inactive(void);
+
 inline void handle_death_explosion(Entity *EXPLOSION);
 inline void spawn_explosion(Entity E);
 inline Entity* get_explosion_inactive(void);
@@ -343,7 +347,7 @@ void init_entities(void)
         stage.entity_count++;
     }
     { // Pickup HP
-        for(int i = 0; i < 32; i++)
+        for(int i = 0; i < 16; i++)
         {
             e.type = ENT_PICKUP_HP,
             e.active = false;
@@ -367,7 +371,7 @@ void init_entities(void)
         }
     }
     { // Pickup Power Up
-        for(int i = 0; i < 32; i++)
+        for(int i = 0; i < 16; i++)
         {
             e.type = ENT_PICKUP_POWERUP,
             e.active = false;
@@ -391,7 +395,7 @@ void init_entities(void)
         }
     }
     { // Pickup Coin
-        for(int i = 0; i < 36; i++)
+        for(int i = 0; i < 32; i++)
         {
             e.type = ENT_PICKUP_COIN,
             e.active = false;
@@ -452,7 +456,7 @@ void init_entities(void)
         }
     }
     { // Explosions
-        for(int i = 0; i < 36; i++)
+        for(int i = 0; i < 40; i++)
         {
             e.type = ENT_EXPLOSION,
             e.active = false;
@@ -475,6 +479,36 @@ void init_entities(void)
             e.anim.cur_frame = 0;
             e.anim.num_frames = 8;
             e.anim.frame_rate = .05f;
+            e.anim.frame_timer = 0;
+
+            stage.entities_pool[stage.entity_count] = e;
+            stage.entity_count++;
+        }
+    }
+    { // Muzzle Flash
+        for(int i = 0; i < 32; i++)
+        {
+            e.type = ENT_MUZZLE_FLASH,
+            e.active = false;
+            e.rect.x = get_scr_width_scaled() / 2 - 140;
+            e.rect.y = get_scr_height_scaled() / 2 + 120;
+
+            e.sprite.src.x = 0;
+            e.sprite.src.y = 0;
+            e.sprite.src.w = 8;
+            e.sprite.src.h = 16;
+
+            e.rect.w = e.sprite.src.w;
+            e.rect.h = e.sprite.src.h;
+
+            e.sprite.tex = load_texture("assets/muzzle_flash.png");
+
+            e.hitbox = e.rect;
+        
+            e.anim.loop = false;
+            e.anim.cur_frame = 0;
+            e.anim.num_frames = 4;
+            e.anim.frame_rate = .02f;
             e.anim.frame_timer = 0;
 
             stage.entities_pool[stage.entity_count] = e;
@@ -602,6 +636,13 @@ void update_entities(void)
                         e->facing_right = player->facing_right;
                         e->rect.x += e->vel.x * game.dt;
                         //e->rect.y += e->vel.y * game.dt;
+                        //
+                        SDL_Rect bul, enem;
+                        bul = e->rect;
+                        bul.w *= SCREEN_SCALE;
+                        bul.h *= SCREEN_SCALE;
+                        bul.x -= (bul.w / 2);
+                        bul.y -= (bul.h / 2);
 
                         if(e->rect.x > get_scr_width_scaled() + 100)
                         {
@@ -612,16 +653,27 @@ void update_entities(void)
                             handle_death_bullet(e);
                         }
 
-                        //5 52 
+                        //TILE id's are 3 and 4
+                        for(int tID = 3; tID < 5; tID++)
+                        {
+                            enem = stage.entities_pool[tID].rect;
+                            enem.w *= SCREEN_SCALE;
+                            enem.h *= SCREEN_SCALE;
+                            enem.x -= (enem.w / 2);
+                            enem.y -= (enem.h / 2);
+
+                            if(stage.entities_pool[tID].active == true)
+                            {
+                                if(SDL_HasIntersection(&bul, &enem))
+                                {
+                                    handle_death_bullet(e);
+                                };
+                            }
+                        }
+
+                        //Enemy ID's are between 5 52 
                         for(int eID = 5; eID < 53; eID++)
                         {
-                            SDL_Rect bul, enem;
-                            bul = e->rect;
-                            bul.w *= SCREEN_SCALE;
-                            bul.h *= SCREEN_SCALE;
-                            bul.x -= (bul.w / 2);
-                            bul.y -= (bul.h / 2);
-
                             enem = stage.entities_pool[eID].rect;
                             enem.w *= SCREEN_SCALE;
                             enem.h *= SCREEN_SCALE;
@@ -716,6 +768,14 @@ void update_entities(void)
                     break;
                 }
             case ENT_EXPLOSION:
+                {
+                    if(e->active)
+                    {
+                        anim_advance(e);
+                    }
+                    break;
+                }
+            case ENT_MUZZLE_FLASH:
                 {
                     if(e->active)
                     {
@@ -882,20 +942,21 @@ void draw_entities(void)
     draw_entity_of_type(ENT_BACKGROUND, false);
     draw_entity_of_type(ENT_TILE, false);
 
-    draw_entity_of_type(ENT_TILE_HITBOX, true);
+    draw_entity_of_type(ENT_TILE_HITBOX, false);
 
-    draw_entity_of_type(ENT_BARREL, true);
+    draw_entity_of_type(ENT_BARREL, false);
 
-    draw_entity_of_type(ENT_PLAYER, true);
-    draw_entity_of_type(ENT_P_PISTOL, true);
+    draw_entity_of_type(ENT_PLAYER, false);
+    draw_entity_of_type(ENT_P_PISTOL, false);
 
-    draw_entity_of_type(ENT_PICKUP_HP, true);
-    draw_entity_of_type(ENT_PICKUP_COIN, true);
-    draw_entity_of_type(ENT_PICKUP_POWERUP, true);
+    draw_entity_of_type(ENT_PICKUP_HP, false);
+    draw_entity_of_type(ENT_PICKUP_COIN, false);
+    draw_entity_of_type(ENT_PICKUP_POWERUP, false);
 
     draw_entity_of_type(ENT_ENEMY, true);
 
-    draw_entity_of_type(ENT_P_BULLET, true);
+    draw_entity_of_type(ENT_P_BULLET, false);
+    draw_entity_of_type(ENT_MUZZLE_FLASH, false);
     draw_entity_of_type(ENT_EXPLOSION, false);
 
     draw_entity_of_type(ENT_UI_P_HEALTH_BG, false);
@@ -926,7 +987,8 @@ inline void draw_entity_of_type(Entity_Type TYPE, char DEBUG)
                 OR TYPE == ENT_ENEMY
                 OR TYPE == ENT_UI_P_SCORE
                 OR TYPE == ENT_PICKUP_COIN
-                OR TYPE == ENT_EXPLOSION)
+                OR TYPE == ENT_EXPLOSION
+                OR TYPE == ENT_MUZZLE_FLASH)
             {
                 e->sprite.src.x = (e->anim.cur_frame * e->sprite.src.w);
             }
@@ -940,7 +1002,8 @@ inline void draw_entity_of_type(Entity_Type TYPE, char DEBUG)
                     OR TYPE == ENT_P_BULLET
                     OR TYPE == ENT_P_PISTOL 
                     OR TYPE == ENT_P_SHOTGUN 
-                    OR TYPE == ENT_P_MACHINEGUN)
+                    OR TYPE == ENT_P_MACHINEGUN
+                    OR TYPE == ENT_MUZZLE_FLASH)
             {
                 if(e->facing_right == true)
                 {
@@ -979,6 +1042,50 @@ inline void draw_debug_rect(Entity *e)
     drect.y -= (drect.h / 2);
     SDL_SetRenderDrawColor(game.renderer, 200, 0, 0, 255);
     SDL_RenderDrawRect(game.renderer, &drect);
+}
+
+inline void spawn_muzzle_flash(Entity E)
+{
+    Entity *muzzl_fx = get_muzzle_flash_inactive();
+    Entity *p = &stage.entities_pool[0];
+
+    muzzl_fx->facing_right = p->facing_right;
+
+    if(muzzl_fx->facing_right)
+    {
+        muzzl_fx->rect.x = E.rect.x + 45;
+    }
+    else 
+    {
+        muzzl_fx->rect.x = E.rect.x - 45;
+    }
+    muzzl_fx->rect.y = E.rect.y;
+
+    muzzl_fx->active = true;
+    muzzl_fx->anim.cur_frame = 0;
+
+}
+
+inline Entity* get_muzzle_flash_inactive(void)
+{
+    Entity *muzzl_fx = NULL;
+    int i = 0;
+    for(i = 0; i < stage.entity_count; i++)
+    {
+        muzzl_fx = &stage.entities_pool[i];
+        if(muzzl_fx->type == ENT_MUZZLE_FLASH AND muzzl_fx->active == false)
+        {
+            return(muzzl_fx);
+        }
+    }
+
+    SDL_Log("Could not find an inactive muzzle flash fx");
+    return(muzzl_fx);
+}
+
+inline void handle_death_muzzle_flash(Entity *MUZZLE_FLASH)
+{
+    MUZZLE_FLASH->active = false;
 }
 
 inline void spawn_explosion(Entity E)
@@ -1034,6 +1141,8 @@ inline void fire_pistol(Entity E)
         b->vel.x = -BULLET_VELOCITY;
         b->facing_right = p->facing_right;
     }
+
+    spawn_muzzle_flash(E);
 }
 
 inline Entity* get_bullet_inactive(void)
@@ -1265,6 +1374,11 @@ inline void anim_advance(Entity *ENTITY)
                 if(ENTITY->type == ENT_EXPLOSION)
                 {
                     handle_death_explosion(ENTITY);
+                }
+
+                if(ENTITY->type == ENT_MUZZLE_FLASH)
+                {
+                    handle_death_muzzle_flash(ENTITY);
                 }
             }
             else 
