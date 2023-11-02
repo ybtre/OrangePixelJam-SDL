@@ -50,7 +50,7 @@ void init_entities(void)
     player_data.is_moving = false;
     player.facing_right = true;
 
-    player_data.reload_rate = .25f;
+    player_data.reload_rate = .15f;
     player_data.reload_timer = 0;
 
     player_data.score = 0;
@@ -189,6 +189,9 @@ void init_entities(void)
             e.base_dmg = 1;
             e.dmg = e.base_dmg;
             e.facing_right = true;
+            e.hit_this_frame = false;
+            e.hit_frame_length = 10;
+            e.hit_frame_timer = 0;
             e.rect.x = get_scr_width_scaled() / 2 + 350;
             e.rect.y = get_scr_height_scaled() / 2 + 150;
 
@@ -478,7 +481,7 @@ void init_entities(void)
             e.anim.loop = false;
             e.anim.cur_frame = 0;
             e.anim.num_frames = 8;
-            e.anim.frame_rate = .05f;
+            e.anim.frame_rate = .02f;
             e.anim.frame_timer = 0;
 
             stage.entities_pool[stage.entity_count] = e;
@@ -508,7 +511,7 @@ void init_entities(void)
             e.anim.loop = false;
             e.anim.cur_frame = 0;
             e.anim.num_frames = 4;
-            e.anim.frame_rate = .02f;
+            e.anim.frame_rate = .01f;
             e.anim.frame_timer = 0;
 
             stage.entities_pool[stage.entity_count] = e;
@@ -604,6 +607,15 @@ void update_entities(void)
                             {
                                 fire_pistol(*e);
 
+                                if(player->facing_right)
+                                {
+                                    player->rect.x -= 10;
+                                }
+                                else 
+                                {
+                                    player->rect.x += 10;
+                                }
+
                                 player_data.reload_timer = 0;
                             }
                         }
@@ -635,7 +647,7 @@ void update_entities(void)
                     {
                         e->facing_right = player->facing_right;
                         e->rect.x += e->vel.x * game.dt;
-                        //e->rect.y += e->vel.y * game.dt;
+                        e->rect.y += e->vel.y * game.dt;
                         //
                         SDL_Rect bul, enem;
                         bul = e->rect;
@@ -686,6 +698,16 @@ void update_entities(void)
                                 {
                                     //TODO: take into account dmg and hp
                                     stage.entities_pool[eID].hp -= e->dmg;
+                                    stage.entities_pool[eID].hit_this_frame = true;
+
+                                    if(stage.entities_pool[eID].facing_right)
+                                    {
+                                        stage.entities_pool[eID].rect.x -= 15;
+                                    }
+                                    else 
+                                    {
+                                        stage.entities_pool[eID].rect.x += 15;
+                                    }
 
                                     if(stage.entities_pool[eID].hp <= 0)
                                     {
@@ -891,34 +913,34 @@ void update_entities(void)
 
                         e->rect.x += e->vel.x * game.dt;
                         e->rect.y += e->vel.y * game.dt;
-                    }
 
-                    SDL_Rect p_r, t_r;
-                    p_r = player->rect;
-                    p_r.w *= SCREEN_SCALE;
-                    p_r.h *= SCREEN_SCALE;
-                    p_r.x -= (p_r.w / 2);
-                    p_r.y -= (p_r.h / 2);
+                        SDL_Rect p_r, t_r;
+                        p_r = player->rect;
+                        p_r.w *= SCREEN_SCALE;
+                        p_r.h *= SCREEN_SCALE;
+                        p_r.x -= (p_r.w / 2);
+                        p_r.y -= (p_r.h / 2);
 
-                    t_r = e->rect;
-                    t_r.w *= SCREEN_SCALE;
-                    t_r.h *= SCREEN_SCALE;
-                    t_r.x -= (t_r.w / 2);
-                    t_r.y -= (t_r.h / 2);
+                        t_r = e->rect;
+                        t_r.w *= SCREEN_SCALE;
+                        t_r.h *= SCREEN_SCALE;
+                        t_r.x -= (t_r.w / 2);
+                        t_r.y -= (t_r.h / 2);
 
-                    if(SDL_HasIntersection(&p_r, &t_r))
-                    {
-                        player_data.take_dmg = true;
-
-                        if(player_data.take_dmg == true 
-                                AND player_data.take_dmg_timer > player_data.take_dmg_rate)
+                        if(SDL_HasIntersection(&p_r, &t_r))
                         {
-                            player->hp--;
-                            player_data.take_dmg = false;
-                            player_data.take_dmg_timer = 0;
-                            SDL_Log("ENEMY DEAL DMG: Player HP: %i", player->hp);
+                            player_data.take_dmg = true;
+
+                            if(player_data.take_dmg == true 
+                                    AND player_data.take_dmg_timer > player_data.take_dmg_rate)
+                            {
+                                player->hp--;
+                                player_data.take_dmg = false;
+                                player_data.take_dmg_timer = 0;
+                                SDL_Log("ENEMY DEAL DMG: Player HP: %i", player->hp);
+                            }
                         }
-                    };
+                    }
                     
                     break;
                 }
@@ -991,6 +1013,18 @@ inline void draw_entity_of_type(Entity_Type TYPE, char DEBUG)
                 OR TYPE == ENT_MUZZLE_FLASH)
             {
                 e->sprite.src.x = (e->anim.cur_frame * e->sprite.src.w);
+
+                if(e->type == ENT_ENEMY AND e->hit_this_frame)
+                {
+                    e->sprite.src.x = 3 * e->sprite.src.w;
+
+                    e->hit_frame_timer++;
+                    if(e->hit_frame_timer > e->hit_frame_length)
+                    {
+                        e->hit_frame_timer = 0;
+                        e->hit_this_frame = false;
+                    }
+                }
             }
 
             if(TYPE == ENT_TILE_HITBOX)
@@ -1005,13 +1039,19 @@ inline void draw_entity_of_type(Entity_Type TYPE, char DEBUG)
                     OR TYPE == ENT_P_MACHINEGUN
                     OR TYPE == ENT_MUZZLE_FLASH)
             {
-                if(e->facing_right == true)
+                SDL_RendererFlip flip = (e->facing_right) ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
+
+                if(TYPE == ENT_P_BULLET)
                 {
-                    blit_from_sheet_and_flip(e->sprite.tex, e->rect, e->sprite.src, 0, SCREEN_SCALE, 1, SDL_FLIP_NONE);
+                    blit_from_sheet_and_flip(e->sprite.tex, e->rect, e->sprite.src, 0, 6, 1, flip);
                 }
-                else if (e->facing_right == false)
+                else if (TYPE == ENT_MUZZLE_FLASH)
                 {
-                    blit_from_sheet_and_flip(e->sprite.tex, e->rect, e->sprite.src, 0, SCREEN_SCALE, 1, SDL_FLIP_HORIZONTAL);
+                    blit_from_sheet_and_flip(e->sprite.tex, e->rect, e->sprite.src, 0, 6, 1, flip);
+                }
+                else 
+                {
+                    blit_from_sheet_and_flip(e->sprite.tex, e->rect, e->sprite.src, 0, SCREEN_SCALE, 1, flip);
                 }
             }
             else if(TYPE == ENT_UI_P_HEALTH_FG)
@@ -1134,11 +1174,13 @@ inline void fire_pistol(Entity E)
     if(p->facing_right)
     {
         b->vel.x = BULLET_VELOCITY;
+        b->vel.y = (rand() % 40 - 20) / 100.f;
         b->facing_right = p->facing_right;
     }
     else 
     {
         b->vel.x = -BULLET_VELOCITY;
+        b->vel.y = (rand() % 40 - 20) / 100.f;
         b->facing_right = p->facing_right;
     }
 

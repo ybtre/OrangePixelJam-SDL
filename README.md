@@ -1,4 +1,4 @@
-#DevLog - ~11:00h
+#DevLog - ~12:30h
 Game 4, side 2d arena shooter part of OrangePascal game jam
 
 ## Game 4/10 in the 10 games in 10 weeks challenge
@@ -19,21 +19,10 @@ need to use provided sprites
 ////////////////////////////////////
 
 #### WIP: Game Feel
-- resize entities a little (make bigger)
-- bigger bullets
-- faster bullets
-- higher RoF
-- less accuracy
-- hit animation (white flash?)
-- enemy knowback on hit
 - permanence (bullet shells on ground?
-- screen shake?
-- player knockback on fire
 - freeze frame/sleep
+- screen shake?
 - gun delay (moves slightly slower than player)
-- telepathic gun
-- more enemies
-- more of everything
 
 
 ##### TBD
@@ -41,10 +30,23 @@ need to use provided sprites
 - think of ammo powerup
 - ammo/reload system?
 - connect ammo/reload system to UI?
+- telepathic gun
+- tweens (ray easings?)
 
 ////////////////////////////////////
               DONE:
 ////////////////////////////////////
+
+//02.11.2023 - ~1:20h
+- slight draw_ent_of_type refactor - 0:25h
+- bigger muzzle flash - 0:05h
+- bigger bullets - 0:05h
+- faster bullets - 0:05h
+- higher RoF - 0:05h
+- less accuracy - 0:10h
+- enemy hit animation (white flash) - 0:15h
+- enemy knowback on hit - 0:05h
+- player knockback on fire - 0;05h
 
 //01.11.2023 - ~2:15h
 - create muzzle flash sprite and anim

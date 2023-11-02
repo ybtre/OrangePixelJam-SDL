@@ -138,6 +138,9 @@ typedef struct
     int             base_dmg;
 
     char            facing_right;
+    char            hit_this_frame;
+    int             hit_frame_timer;
+    int             hit_frame_length;
 
     SDL_Rect        rect; //x, y for position, w, h for constructing dest rect
     Vec2            vel;
