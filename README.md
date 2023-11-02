@@ -18,8 +18,15 @@ need to use provided sprites
               TODO:
 ////////////////////////////////////
 
-#### WIP: Game Feel
+#### FINAL:
+- add graphics to main menu
+- add graphics to game over
+- game over leads to main menu
+- - reset spacebar down state when transitioning to game over
+- basic sounds effects
 - permanence (bullet shells on ground?
+
+#### WIP: Game Feel
 - freeze frame/sleep
 - screen shake?
 - gun delay (moves slightly slower than player)
@@ -47,6 +54,7 @@ need to use provided sprites
 - enemy hit animation (white flash) - 0:15h
 - enemy knowback on hit - 0:05h
 - player knockback on fire - 0;05h
+- increase enemy spawn rate with time - 0:10h
 
 //01.11.2023 - ~2:15h
 - create muzzle flash sprite and anim

@@ -42,6 +42,8 @@ inline void anim_advance(Entity *ENTITY);
 Entity player = {};
 PlayerData player_data = {};
 
+float game_timer = 0;
+
 float enemy_spawn_interval = 1;
 float enemy_spawn_timer = 3;
 
@@ -64,6 +66,8 @@ void init_entities(void)
 
     enemy_spawn_interval = .5;
     enemy_spawn_timer = 3;
+
+    game_timer = 0;
 
     { // Player
         player.type = ENT_PLAYER;
@@ -529,6 +533,28 @@ void update_entities(void)
 
     player_data.reload_timer  += (game.dt / 1000.f);
     enemy_spawn_timer += (game.dt / 1000.f);
+    game_timer += (game.dt / 1000.f);
+
+    if(game_timer < 10)
+    {
+        enemy_spawn_interval = 2;
+    }
+    else if(game_timer >= 10 AND game_timer < 20)
+    {
+        enemy_spawn_interval = 1.5f;
+    }
+    else if(game_timer >= 20 AND game_timer < 30)
+    {
+        enemy_spawn_interval = 1;
+    }
+    else if(game_timer >= 30 AND game_timer < 40)
+    {
+        enemy_spawn_interval = .5f;
+    }
+    else if(game_timer >= 40)
+    {
+        enemy_spawn_interval = .1f;
+    }
 
     if(player_data.take_dmg)
     {
@@ -990,6 +1016,11 @@ void draw_entities(void)
     sprintf(score_buffer, "%i", player_data.score);
     SDL_Rect dest = { (get_scr_width_scaled() / 2) - 40, 40, 0, 0};
     render_text(score_buffer, dest, 2.f);
+
+    char game_timer_buffer[32];
+    sprintf(game_timer_buffer, "Game time: %.0f", game_timer);
+    SDL_Rect destt = { 10, 40, 0, 0};
+    render_text(game_timer_buffer, destt, 2.f);
 }
 
 inline void draw_entity_of_type(Entity_Type TYPE, char DEBUG)
@@ -1174,13 +1205,13 @@ inline void fire_pistol(Entity E)
     if(p->facing_right)
     {
         b->vel.x = BULLET_VELOCITY;
-        b->vel.y = (rand() % 40 - 20) / 100.f;
+        b->vel.y = (rand() % 80 - 40) / 100.f;
         b->facing_right = p->facing_right;
     }
     else 
     {
         b->vel.x = -BULLET_VELOCITY;
-        b->vel.y = (rand() % 40 - 20) / 100.f;
+        b->vel.y = (rand() % 80 - 40) / 100.f;
         b->facing_right = p->facing_right;
     }
 
