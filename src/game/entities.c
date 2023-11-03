@@ -49,6 +49,10 @@ float enemy_spawn_timer = 3;
 
 void init_entities(void)
 {
+    stage.freeze_frame = false;
+    stage.freeze_frame_timer = 0;
+    stage.freeze_frame_duration = 3;
+
     player_data.is_moving = false;
     player.facing_right = true;
 
@@ -531,7 +535,21 @@ void update_entities(void)
     Entity *e;
     Entity *player = &stage.entities_pool[0];
 
-    player_data.reload_timer  += (game.dt / 1000.f);
+    if(stage.freeze_frame)
+    {
+        stage.freeze_frame_timer++;
+        if(stage.freeze_frame_timer < stage.freeze_frame_duration)
+        {
+            return;
+        }
+        if(stage.freeze_frame_duration >= stage.freeze_frame_timer)
+        {
+            stage.freeze_frame = false;
+            stage.freeze_frame_timer = 0;
+        }
+    }
+
+    player_data.reload_timer += (game.dt / 1000.f);
     enemy_spawn_timer += (game.dt / 1000.f);
     game_timer += (game.dt / 1000.f);
 
@@ -734,12 +752,14 @@ void update_entities(void)
                                     {
                                         stage.entities_pool[eID].rect.x += 15;
                                     }
+                                    stage.entities_pool[eID].rect.y -= 30;
 
                                     if(stage.entities_pool[eID].hp <= 0)
                                     {
                                         handle_death_enemy(&stage.entities_pool[eID]);
                                     }
-
+                                    
+                                    stage.freeze_frame = true;
                                     handle_death_bullet(e);
                                 };
                             }
@@ -938,7 +958,13 @@ void update_entities(void)
                         }
 
                         e->rect.x += e->vel.x * game.dt;
+
+                        e->vel.y = .3f;
                         e->rect.y += e->vel.y * game.dt;
+                        if(e->rect.y > get_scr_height_scaled() / 2 + 150)
+                        {
+                            e->rect.y = get_scr_height_scaled() / 2 + 150;
+                        }
 
                         SDL_Rect p_r, t_r;
                         p_r = player->rect;
@@ -981,6 +1007,8 @@ void update_entities(void)
 
     if(player->hp <= 0)
     {
+        //reset key state to up
+        game.keyboard[SDL_SCANCODE_SPACE] = 0;
         game_state = GAME_OVER;
     }
 }
@@ -1018,7 +1046,7 @@ void draw_entities(void)
     render_text(score_buffer, dest, 2.f);
 
     char game_timer_buffer[32];
-    sprintf(game_timer_buffer, "Game time: %.0f", game_timer);
+    sprintf(game_timer_buffer, "TIME: %.0f", game_timer);
     SDL_Rect destt = { 10, 40, 0, 0};
     render_text(game_timer_buffer, destt, 2.f);
 }
@@ -1246,7 +1274,7 @@ inline void spawn_pickup_hp(Entity E)
     Entity *hp = get_pickup_hp_inactive();
     
     hp->rect.x = E.rect.x;
-    hp->rect.y = E.rect.y;
+    hp->rect.y = E.rect.y + 30;
 
     hp->active = true;
 }
@@ -1278,7 +1306,7 @@ inline void spawn_pickup_coin(Entity E)
     Entity *coin = get_pickup_coin_inactive();
     
     coin->rect.x = E.rect.x;
-    coin->rect.y = E.rect.y;
+    coin->rect.y = E.rect.y + 30;
 
     coin->active = true;
 }
@@ -1310,7 +1338,7 @@ inline void spawn_pickup_powerup(Entity E)
     Entity *powerup = get_pickup_powerup_inactive();
     
     powerup->rect.x = E.rect.x;
-    powerup->rect.y = E.rect.y;
+    powerup->rect.y = E.rect.y + 30;
 
     powerup->active = true;
 }

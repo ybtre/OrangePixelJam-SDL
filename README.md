@@ -19,15 +19,9 @@ need to use provided sprites
 ////////////////////////////////////
 
 #### FINAL:
-- add graphics to main menu
-- add graphics to game over
-- game over leads to main menu
-- - reset spacebar down state when transitioning to game over
-- basic sounds effects
 - permanence (bullet shells on ground?
 
 #### WIP: Game Feel
-- freeze frame/sleep
 - screen shake?
 - gun delay (moves slightly slower than player)
 
@@ -43,6 +37,15 @@ need to use provided sprites
 ////////////////////////////////////
               DONE:
 ////////////////////////////////////
+
+//03.11.2023 -
+- enemy knockup on hit - 0:10h
+- fix pickups spawning in the air
+- freeze frame/sleep - 0:10h
+- add graphics to main menu - 0:15h
+- add graphics to game over - 0;05
+- game over leads to main menu - 0:05 
+- - reset spacebar down state when transitioning to game over - 0:05h
 
 //02.11.2023 - ~1:20h
 - slight draw_ent_of_type refactor - 0:25h

@@ -14,6 +14,8 @@ inline SDL_Texture *cursor_texture;
 inline SDL_Texture *spritesheet;
 
 inline void reset_game(void);
+inline void render_main_menu();
+inline void render_game_over();
 
 void init_stage(void)
 {
@@ -56,7 +58,9 @@ inline void update(void)
                 if(game.keyboard[SDL_SCANCODE_SPACE])
                 {
                     reset_game();
-                    game_state = PLAYING;
+                    //reset key state to up
+                    game.keyboard[SDL_SCANCODE_SPACE] = 0;
+                    game_state = MAIN_MENU;
                 }
             }
             break;
@@ -74,12 +78,18 @@ inline void render(void)
     {
         case MAIN_MENU:
             {
+                render_main_menu();
 
                 char buff[32];
                 sprintf(buff, "PRESS SPACE TO PLAY!");
 
-                SDL_Rect dest = {get_scr_width_scaled() / 4, get_scr_height_scaled() / 2, 0, 0};
-                render_text(buff, dest, 2.f);
+                SDL_Rect dest = {get_scr_width_scaled() / 4 - 50, get_scr_height_scaled() / 2 - 80, 0, 0};
+                render_text(buff, dest, 3.f);
+
+                sprintf(buff, "Mockup Jam!");
+                dest.x = get_scr_width_scaled() / 4 + 50;
+                dest.y = get_scr_height_scaled() / 2 - 310;
+                render_text(buff, dest, 4.f);
             }
             break;
         
@@ -92,12 +102,19 @@ inline void render(void)
 
         case GAME_OVER:
             {
+                render_game_over();
 
-                char buff[32];
-                sprintf(buff, "PRESS SPACE TO RESTART!");
+                char buff[48];
+                sprintf(buff, "PRESS SPACE TO GO BACK TO MAIN MENU!");
 
-                SDL_Rect dest = {get_scr_width_scaled() / 5, get_scr_height_scaled() / 2, 0, 0};
+                SDL_Rect dest = {get_scr_width_scaled() / 4 - 200, get_scr_height_scaled() / 2 - 80, 0, 0};
                 render_text(buff, dest, 2.f);
+
+                sprintf(buff, "GAME OVER!");
+                dest.x = get_scr_width_scaled() / 4 + 50;
+                dest.y = get_scr_height_scaled() / 2 - 310;
+                render_text(buff, dest, 4.f);
+
             }
             break;
     }
@@ -109,4 +126,51 @@ inline void render(void)
 inline void reset_game(void)
 {
     init_entities();
+}
+
+inline void render_game_over()
+{
+    Entity e;
+    e.type = ENT_BACKGROUND;
+    e.active = true;
+    e.rect.x = get_scr_width_scaled() / 2;
+    e.rect.y = get_scr_height_scaled() / 2;
+
+    e.sprite.src.x = 0;
+    e.sprite.src.y = 0;
+    e.sprite.src.w = 320;
+    e.sprite.src.h = 180;
+
+    e.rect.w = e.sprite.src.w;
+    e.rect.h = e.sprite.src.h;
+
+    e.sprite.tex = load_texture("assets/game_over_bg.png");
+
+    e.hitbox = e.rect;
+
+    blit_from_sheet(e.sprite.tex, e.rect, e.sprite.src, 0, SCREEN_SCALE, 1);
+
+}
+
+inline void render_main_menu()
+{
+    Entity e;
+    e.type = ENT_BACKGROUND;
+    e.active = true;
+    e.rect.x = get_scr_width_scaled() / 2;
+    e.rect.y = get_scr_height_scaled() / 2;
+
+    e.sprite.src.x = 0;
+    e.sprite.src.y = 0;
+    e.sprite.src.w = 320;
+    e.sprite.src.h = 180;
+
+    e.rect.w = e.sprite.src.w;
+    e.rect.h = e.sprite.src.h;
+
+    e.sprite.tex = load_texture("assets/main_menu_bg.png");
+
+    e.hitbox = e.rect;
+
+    blit_from_sheet(e.sprite.tex, e.rect, e.sprite.src, 0, SCREEN_SCALE, 1);
 }

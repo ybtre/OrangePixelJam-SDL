@@ -171,6 +171,9 @@ typedef struct
     //Entity 0 is always player
     int             entity_count;
     Entity          entities_pool[ENTITIES_MAX];
+    char            freeze_frame;
+    float           freeze_frame_duration;
+    float           freeze_frame_timer;
 }Stage;
 extern Stage stage;
 
