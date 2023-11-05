@@ -1,7 +1,23 @@
 #DevLog - ~12:30h
 Game 4, side 2d arena shooter part of OrangePascal game jam
 
-[![Image from Gyazo](https://i.gyazo.com/56f3a8aac61c4980e7b47ff8f43967a9.gif)](https://gyazo.com/56f3a8aac61c4980e7b47ff8f43967a9)
+<br>
+
+<details>
+  <summary>Dev Gifs!!</summary>
+  
+  [![Image from Gyazo](https://i.gyazo.com/56f3a8aac61c4980e7b47ff8f43967a9.gif)](https://gyazo.com/56f3a8aac61c4980e7b47ff8f43967a9)
+
+  [![Image from Gyazo](https://i.gyazo.com/cdc10e3ad8553fb04ddb98f7e7d854c8.gif)](https://gyazo.com/cdc10e3ad8553fb04ddb98f7e7d854c8)
+
+  [![Image from Gyazo](https://i.gyazo.com/8c2c2ac24afb423e124a409755a647c5.gif)](https://gyazo.com/8c2c2ac24afb423e124a409755a647c5)
+
+  [![Image from Gyazo](https://i.gyazo.com/9ea77803fcbc736e2160197130ddbb02.gif)](https://gyazo.com/9ea77803fcbc736e2160197130ddbb02)
+  
+</details>
+<br>
+<br>
+<br>
 
 ## Game 4/10 in the 10 games in 10 weeks challenge
 ////////////////////////////////////
