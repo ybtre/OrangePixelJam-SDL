@@ -1,4 +1,4 @@
-#DevLog - ~12:30h
+# DevLog - ~12:30h
 Game 4, side 2d arena shooter part of OrangePascal game jam
 
 <br>
@@ -18,6 +18,12 @@ Game 4, side 2d arena shooter part of OrangePascal game jam
 <br>
 <br>
 <br>
+
+## Building:
+Only on Windows.
+- go to root folder
+- use command "make"
+- either run Game.exe from build folder or use "run.bat" file
 
 ## Game 4/10 in the 10 games in 10 weeks challenge
 ////////////////////////////////////
