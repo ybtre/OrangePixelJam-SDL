@@ -10,7 +10,7 @@ Game 4, side 2d arena shooter part of OrangePascal game jam
 
   [![Orange Pixel Jam Final Start](final_start.gif)]
 
-  [![Orange Pixel Jam Final Fun Telephatic Bug](fun_bug.gif)]
+  [![Orange Pixel Jam Final Fun Telephatic Bug](Fun_Bug.gif)]
   
   [![Orange Pixel Jam Final Early WIP](early_wip.gif)]
   
