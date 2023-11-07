@@ -3,9 +3,6 @@ Game 4, side 2d arena shooter part of OrangePascal game jam
 
 <br>
 
-<details>
-  <summary>Dev Gifs!!</summary>
-  
   [![Orange Pixel Jam Final Swarmed](final_swarmed.gif)]
 
   [![Orange Pixel Jam Final Start](final_start.gif)]
@@ -14,7 +11,6 @@ Game 4, side 2d arena shooter part of OrangePascal game jam
   
   [![Orange Pixel Jam Final Early WIP](early_wip.gif)]
   
-</details>
 <br>
 <br>
 <br>
